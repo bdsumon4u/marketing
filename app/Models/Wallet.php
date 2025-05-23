@@ -2,35 +2,38 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Enums\CompanyWalletType;
+use Bavix\Wallet\Models\Wallet as BavixWallet;
+use Bavix\Wallet\Traits\HasWallets;
+use Illuminate\Support\Str;
 
-class Wallet extends Model
+class Wallet extends BavixWallet
 {
-    protected $fillable = [
-        'user_id',
-        'balance',
-    ];
+    use HasWallets;
 
-    public function user(): BelongsTo
+    private static $company = null;
+
+    public static function company(): self
     {
-        return $this->belongsTo(User::class);
+        return self::$company ??= static::firstOrCreate(
+            ['slug' => CompanyWalletType::COMPANY->value],
+            [
+                'name' => CompanyWalletType::COMPANY->name(),
+                'holder_type' => static::class,
+                'uuid' => Str::uuid(),
+                'holder_id' => 0,
+            ]
+        );
     }
 
-    public function transactions(): HasMany
+    public static function createDefaultWallets(): void
     {
-        return $this->hasMany(WalletTransaction::class);
-    }
-
-    public function credit(float $amount, string $description): void
-    {
-        $this->transactions()->create([
-            'amount' => $amount,
-            'type' => 'credit',
-            'description' => $description,
-        ]);
-
-        $this->increment('balance', $amount);
+        foreach (CompanyWalletType::all() as $wallet) {
+            self::company()->createWallet([
+                'name' => $wallet['name'],
+                'slug' => $wallet['slug'],
+                'meta' => ['percentage_share' => $wallet['percentage_share']],
+            ]);
+        }
     }
 }

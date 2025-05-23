@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Traits\HasWallet;
+use Bavix\Wallet\Traits\HasWalletFloat;
+use Bavix\Wallet\Traits\HasWallets;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -14,11 +16,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wallet
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasWallet, Notifiable;
+    use HasFactory, HasWalletFloat, HasWallets, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,11 +29,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
      * @var list<string>
      */
     protected $fillable = [
+        'referrer_id',
         'name',
+        'username',
         'email',
+        'phone',
         'password',
-        'referral_code',
-        'referred_by',
     ];
 
     /**
@@ -61,23 +65,23 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
         parent::boot();
 
         static::creating(function (User $user) {
-            if (! $user->referral_code) {
-                $user->referral_code = $user->generateReferralCode();
+            if (! $user->username) {
+                $user->username = $user->generateUsername();
             }
         });
     }
 
     public function referrer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'referred_by');
+        return $this->belongsTo(User::class, 'referrer_id');
     }
 
     public function referrals(): HasMany
     {
-        return $this->hasMany(User::class, 'referred_by');
+        return $this->hasMany(User::class, 'referrer_id');
     }
 
-    public function generateReferralCode(): string
+    public function generateUsername(): string
     {
         // Characters that are easy to read and distinguish
         $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed I, O, 0, 1
@@ -88,9 +92,19 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
             for ($i = 0; $i < 8; $i++) {
                 $code .= $chars[random_int(0, strlen($chars) - 1)];
             }
-        } while (static::where('referral_code', $code)->exists());
+        } while (static::where('username', $code)->exists());
 
         return $code;
+    }
+
+    public function getOrCreateWallet(string $slug): Wallet
+    {
+        return $this->wallets()->firstOrCreate(
+            ['slug' => $slug],
+            [
+                'name' => Str::title(Str::replace('-', ' ', $slug)) . ' Wallet',
+            ]
+        );
     }
 
     public function getReferralIncentive(int $level): float
@@ -102,13 +116,6 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
             4, 5 => 3.0, // 3%
             default => 2.0, // 2%
         };
-    }
-
-    public function hasReachedReferralLimit(): bool
-    {
-        $maxReferrals = config('mlm.max_referrals_per_user', 4);
-
-        return $this->referrals()->count() >= $maxReferrals;
     }
 
     public function canAccessPanel(Panel $panel): bool
