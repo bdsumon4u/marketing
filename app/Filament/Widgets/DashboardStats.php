@@ -2,6 +2,9 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\User;
+use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 
 class DashboardStats extends Widget
@@ -10,9 +13,9 @@ class DashboardStats extends Widget
 
     protected int | string | array $columnSpan = 'full';
 
-    public function getUser()
+    public function getUser(): User
     {
-        return auth()->user();
+        return Filament::auth()->user();
     }
 
     public function getReferralLink(): string
@@ -20,5 +23,13 @@ class DashboardStats extends Widget
         $user = $this->getUser();
 
         return url('/register?ref='.($user->referral_code ?? ''));
+    }
+
+    public function notifyCopied(): void
+    {
+        Notification::make()
+            ->success()
+            ->title('Referral link copied!')
+            ->send();
     }
 }

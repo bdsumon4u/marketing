@@ -3,13 +3,13 @@
     width="md"
 >
     <x-slot name="header">
-        Withdraw Funds
+        <h2 class="text-xl font-bold tracking-tight">Withdraw Funds</h2>
     </x-slot>
 
     <form wire:submit="submit">
         {{ $this->form }}
 
-        <div class="mt-4 flex justify-end">
+        <div class="flex justify-end mt-4">
             <x-filament::button
                 type="submit"
                 color="primary"
