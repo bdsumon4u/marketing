@@ -4,8 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Enums\UserRank;
 use Bavix\Wallet\Interfaces\Wallet;
-use Bavix\Wallet\Traits\HasWallet;
+use Bavix\Wallet\Interfaces\WalletFloat;
 use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Traits\HasWallets;
 use Filament\Models\Contracts\FilamentUser;
@@ -35,6 +36,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
         'email',
         'phone',
         'password',
+        'rank',
+        'is_active',
     ];
 
     /**
@@ -57,6 +60,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'rank' => UserRank::class,
         ];
     }
 
@@ -97,12 +102,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
         return $code;
     }
 
-    public function getOrCreateWallet(string $slug): Wallet
+    public function getOrCreateWallet(string $slug): WalletFloat
     {
         return $this->wallets()->firstOrCreate(
             ['slug' => $slug],
             [
-                'name' => Str::title(Str::replace('-', ' ', $slug)) . ' Wallet',
+                'name' => Str::title(Str::replace('-', ' ', $slug)).' Wallet',
             ]
         );
     }

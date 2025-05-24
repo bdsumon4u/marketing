@@ -2,10 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Livewire\Component;
 
 class AddFundModal extends Component implements HasForms
@@ -38,15 +41,17 @@ class AddFundModal extends Component implements HasForms
         $data = $this->form->getState();
 
         // Add your fund addition logic here
-        $user = auth()->user();
-        $user->balance += $data['amount'];
-        $user->save();
+        $user = value(fn (): User => Filament::auth()->user());
+        $user->depositFloat($data['amount']);
+
+        $this->dispatch('refresh-balance');
+
+        Notification::make()
+            ->title('Funds added successfully!')
+            ->success()
+            ->send();
 
         $this->dispatch('close-modal', id: 'add-fund-modal');
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Funds added successfully!',
-        ]);
     }
 
     public function render()

@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -29,7 +31,11 @@ class WithdrawModal extends Component implements HasForms
                     ->required()
                     ->prefix('$')
                     ->minValue(1)
-                    ->maxValue(auth()->user()->balance),
+                    ->maxValue(function () {
+                        return value(fn (): User => Filament::auth()->user())
+                            ->getOrCreateWallet('earning')
+                            ->balanceFloat;
+                    }),
             ])
             ->statePath('data');
     }
@@ -39,9 +45,8 @@ class WithdrawModal extends Component implements HasForms
         $data = $this->form->getState();
 
         // Add your withdrawal logic here
-        $user = auth()->user();
-        $user->balance -= $data['amount'];
-        $user->save();
+        $user = value(fn (): User => Filament::auth()->user());
+        $user->getOrCreateWallet('earning')->withdrawFloat($data['amount']);
 
         $this->dispatch('close-modal', id: 'withdraw-modal');
         $this->dispatch('notify', [

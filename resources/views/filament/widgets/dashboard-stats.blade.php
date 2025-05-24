@@ -1,6 +1,5 @@
 <x-filament::widget>
     @php
-        $user = $this->getUser();
         $colorMap = [
             'primary' => ['bg' => 'bg-blue-50 dark:bg-blue-900', 'icon' => 'text-blue-500 dark:text-blue-300', 'amount' => 'text-blue-600 dark:text-blue-200'],
             'success' => ['bg' => 'bg-green-50 dark:bg-green-900', 'icon' => 'text-green-500 dark:text-green-300', 'amount' => 'text-green-600 dark:text-green-200'],
@@ -11,28 +10,28 @@
         $rows = [
             [
                 // Row 1: 3 columns
-                ['icon' => 'heroicon-o-banknotes', 'label' => 'Total Deposit', 'value' => $user->total_deposit ?? 0, 'color' => 'primary'],
-                ['icon' => 'heroicon-o-chart-bar', 'label' => 'Total Income', 'value' => $user->total_income ?? 0, 'color' => 'success'],
-                ['icon' => 'heroicon-o-currency-dollar', 'label' => 'Total Withdraw', 'value' => $user->total_withdraw ?? 0, 'color' => 'danger'],
+                ['icon' => 'heroicon-o-banknotes', 'label' => 'Total Deposit', 'value' => auth()->user()->total_deposit ?? 0, 'color' => 'primary'],
+                ['icon' => 'heroicon-o-chart-bar', 'label' => 'Total Income', 'value' => auth()->user()->total_income ?? 0, 'color' => 'success'],
+                ['icon' => 'heroicon-o-currency-dollar', 'label' => 'Total Withdraw', 'value' => auth()->user()->total_withdraw ?? 0, 'color' => 'danger'],
             ],
             [
                 // Row 2: 4 columns
-                ['icon' => 'heroicon-o-user-group', 'label' => 'Refer Income', 'value' => $user->refer_income ?? 0, 'color' => 'info'],
-                ['icon' => 'heroicon-o-user-group', 'label' => 'Generation Income', 'value' => $user->generation_income ?? 0, 'color' => 'info'],
-                ['icon' => 'heroicon-o-chart-bar', 'label' => 'Rank Incentive', 'value' => $user->rank_incentive ?? 0, 'color' => 'success'],
-                ['icon' => 'heroicon-o-star', 'label' => 'Magic Income', 'value' => $user->magic_income ?? 0, 'color' => 'primary'],
+                ['icon' => 'heroicon-o-user-group', 'label' => 'Referral Income', 'value' => auth()->user()->referral_income ?? 0, 'color' => 'info'],
+                ['icon' => 'heroicon-o-user-group', 'label' => 'Generation Income', 'value' => auth()->user()->generation_income ?? 0, 'color' => 'info'],
+                ['icon' => 'heroicon-o-chart-bar', 'label' => 'Rank Income', 'value' => auth()->user()->rank_income ?? 0, 'color' => 'success'],
+                ['icon' => 'heroicon-o-star', 'label' => 'Magic Income', 'value' => auth()->user()->magic_income ?? 0, 'color' => 'primary'],
             ],
             [
                 // Row 3: 4 columns
-                ['icon' => 'heroicon-o-clock', 'label' => 'Pending Deposit', 'value' => $user->pending_deposit ?? 0, 'color' => 'warning'],
-                ['icon' => 'heroicon-o-x-circle', 'label' => 'Rejected Deposit', 'value' => $user->rejected_deposit ?? 0, 'color' => 'danger'],
-                ['icon' => 'heroicon-o-clock', 'label' => 'Pending Withdraw', 'value' => $user->pending_withdraw ?? 0, 'color' => 'warning'],
-                ['icon' => 'heroicon-o-x-circle', 'label' => 'Rejected Withdraw', 'value' => $user->rejected_withdraw ?? 0, 'color' => 'danger'],
+                ['icon' => 'heroicon-o-clock', 'label' => 'Pending Deposit', 'value' => auth()->user()->pending_deposit ?? 0, 'color' => 'warning'],
+                ['icon' => 'heroicon-o-x-circle', 'label' => 'Rejected Deposit', 'value' => auth()->user()->rejected_deposit ?? 0, 'color' => 'danger'],
+                ['icon' => 'heroicon-o-clock', 'label' => 'Pending Withdraw', 'value' => auth()->user()->pending_withdraw ?? 0, 'color' => 'warning'],
+                ['icon' => 'heroicon-o-x-circle', 'label' => 'Rejected Withdraw', 'value' => auth()->user()->rejected_withdraw ?? 0, 'color' => 'danger'],
             ],
             [
                 // Row 4: 2 columns
-                ['icon' => 'heroicon-o-arrow-up-tray', 'label' => 'Total Send', 'value' => $user->total_send ?? 0, 'color' => 'info'],
-                ['icon' => 'heroicon-o-arrow-down-tray', 'label' => 'Total Receive', 'value' => $user->total_receive ?? 0, 'color' => 'info'],
+                ['icon' => 'heroicon-o-arrow-up-tray', 'label' => 'Total Send', 'value' => auth()->user()->total_send ?? 0, 'color' => 'info'],
+                ['icon' => 'heroicon-o-arrow-down-tray', 'label' => 'Total Receive', 'value' => auth()->user()->total_receive ?? 0, 'color' => 'info'],
             ],
         ];
     @endphp
