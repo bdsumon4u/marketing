@@ -46,6 +46,8 @@ class AddFundModal extends Component implements HasForms
 
         $this->dispatch('refresh-balance');
 
+        $this->form->fill();
+
         Notification::make()
             ->title('Funds added successfully!')
             ->success()

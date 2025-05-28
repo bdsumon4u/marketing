@@ -114,6 +114,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
 
     public function getReferralIncentive(int $level): float
     {
+        if (! $this->is_active || ($level > 1 && $this->referrals_count < 3)) {
+            return 0;
+        }
+
         return match ($level) {
             1 => 25.0, // 25%
             2 => 5.0,  // 5%

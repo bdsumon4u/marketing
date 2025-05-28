@@ -21,7 +21,6 @@ class ProcessMLMIncentives implements ShouldQueue
      */
     public function __construct(
         protected User $newUser,
-        protected ?User $firstReferrer = null
     ) {}
 
     /**
@@ -30,7 +29,11 @@ class ProcessMLMIncentives implements ShouldQueue
     public function handle(): void
     {
         $registrationFee = config('mlm.registration_fee');
-        $referralChain = $this->buildReferralChain($this->firstReferrer);
+        if ($this->newUser->balanceFloat < $registrationFee) {
+            return;
+        }
+        $this->newUser->update(['is_active' => true]);
+        $referralChain = $this->buildReferralChain($this->newUser);
 
         $distributedAmount = 0;
         foreach ($referralChain as $index => $referrer) {
@@ -39,7 +42,17 @@ class ProcessMLMIncentives implements ShouldQueue
             $incentiveAmount = ($registrationFee * $incentivePercentage) / 100;
             $distributedAmount += $incentiveAmount;
             // Credit the referrer's wallet
-            $referrer->deposit($incentiveAmount, [
+            // $referrer->deposit($incentiveAmount, [
+            //     'description' => "Referral incentive for level {$level}",
+            //     'meta' => [
+            //         'level' => $level,
+            //         'type' => 'referral',
+            //         'amount' => $incentiveAmount,
+            //         'percentage' => $incentivePercentage,
+            //         'referred_user_id' => $this->newUser->id,
+            //     ],
+            // ]);
+            $this->newUser->transferFloat($referrer->getOrCreateWallet('earning'), $incentiveAmount, [
                 'description' => "Referral incentive for level {$level}",
                 'meta' => [
                     'level' => $level,
@@ -67,7 +80,11 @@ class ProcessMLMIncentives implements ShouldQueue
                 $percentageShare = $wallet->meta['percentage_share'] ?? 0;
                 $amount = ($registrationFee * $percentageShare) / 100;
             }
-            $wallet->deposit($amount, [
+            // $wallet->deposit($amount, [
+            //     'description' => 'Registration fee distribution',
+            //     'user_id' => $this->newUser->id,
+            // ]);
+            $this->newUser->transferFloat($wallet, $amount, [
                 'description' => 'Registration fee distribution',
                 'user_id' => $this->newUser->id,
             ]);
@@ -84,27 +101,27 @@ class ProcessMLMIncentives implements ShouldQueue
         }
 
         Log::info('New referral registered', [
-            'referrer_id' => $this->firstReferrer?->id,
+            'referrer_id' => $this->newUser->referrer?->id,
             'referred_user_id' => $this->newUser->id,
-            'referrer' => $this->firstReferrer?->username,
+            'referrer' => $this->newUser->referrer?->username,
             'registration_fee' => $registrationFee,
         ]);
     }
 
-    protected function buildReferralChain(?User $firstReferrer, int $depth = 10): array
+    protected function buildReferralChain(?User $newUser, int $depth = 10): array
     {
-        if (! $firstReferrer) {
+        if (! $newUser->referrer) {
             return [];
         }
 
-        $chain = [$firstReferrer];
-        $currentUser = $firstReferrer;
+        $chain = [$newUser->referrer];
+        $currentUser = $newUser->referrer;
 
         for ($i = 1; $i < $depth; $i++) {
             if (! $currentUser->referrer) {
                 break;
             }
-            $chain[] = $currentUser->referrer;
+            $chain[] = $currentUser->referrer->loadCount('referrals');
             $currentUser = $currentUser->referrer;
         }
 

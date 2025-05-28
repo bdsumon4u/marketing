@@ -57,9 +57,6 @@ class Register extends BaseRegister
                 'referrer_id' => $referrer?->id,
             ]);
 
-            // Dispatch job to process MLM incentives
-            ProcessMLMIncentives::dispatch($user, $referrer);
-
             return $user;
         });
     }

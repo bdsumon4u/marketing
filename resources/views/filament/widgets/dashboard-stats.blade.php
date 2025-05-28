@@ -10,9 +10,9 @@
                     <button wire:click="$dispatch('open-modal', { id: 'add-fund-modal' })" class="ml-2 font-medium underline hover:no-underline">
                         DEPOSIT NOW
                     </button>
-                    <span class="ml-2">at least <strong>{{ config('mlm.registration_fee') }} BDT</strong> to verify your account</span>
+                    <span class="ml-2">at least <strong>{{ config('mlm.registration_fee') - auth()->user()->balanceFloat }} BDT</strong> to verify your account</span>
                 @else
-                    <a href="" class="ml-2 font-medium underline hover:no-underline">VERIFY NOW</a>
+                    <button wire:click="verifyAccount" class="ml-2 font-medium underline hover:no-underline">VERIFY NOW</button>
                 @endif
             </div>
         </div>
