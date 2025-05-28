@@ -7,6 +7,7 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use Livewire\Attributes\Computed;
 
 class DashboardStats extends Widget
 {
@@ -21,33 +22,22 @@ class DashboardStats extends Widget
         ];
     }
 
-    public function getReferralLink(): string
+    protected function user(): User
     {
-        return Filament::getPanel()->getRegistrationUrl([
-            'ref' => Filament::auth()->user()->username,
-        ]);
-    }
-
-    public function notifyCopied(): void
-    {
-        Notification::make()
-            ->success()
-            ->title('Referral link copied!')
-            ->send();
+        return Filament::auth()->user();
     }
 
     public function verifyAccount(): void
     {
         $registrationFee = config('mlm.registration_fee');
-        $user = value(fn (): User => Filament::auth()->user());
-        if ($user->is_active) {
+        if ($this->user()->is_active) {
             Notification::make()
                 ->info()
                 ->title('Account already verified!')
                 ->send();
             return;
         }
-        if ($user->balanceFloat < $registrationFee) {
+        if ($this->user()->balanceFloat < $registrationFee) {
             Notification::make()
                 ->danger()
                 ->title('Insufficient balance!')
@@ -55,7 +45,7 @@ class DashboardStats extends Widget
                 ->send();
             return;
         }
-        ProcessMLMIncentives::dispatch($user);
+        ProcessMLMIncentives::dispatch($this->user());
         Notification::make()
             ->success()
             ->title('Account is being verified...')

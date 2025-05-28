@@ -7,11 +7,13 @@ namespace App\Models;
 use App\Enums\UserRank;
 use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Interfaces\WalletFloat;
+use Bavix\Wallet\Models\Transaction;
 use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Traits\HasWallets;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -102,7 +104,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
         return $code;
     }
 
-    public function getOrCreateWallet(string $slug): WalletFloat
+    public function getOrCreateWallet(string $slug = 'default'): WalletFloat
     {
         return $this->wallets()->firstOrCreate(
             ['slug' => $slug],
@@ -110,6 +112,24 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
                 'name' => Str::title(Str::replace('-', ' ', $slug)).' Wallet',
             ]
         );
+    }
+
+    public function hasPendingDeposit(int $amount, ?int $minutes = null): bool
+    {
+        if ($this->pending_deposit < $amount) {
+            return false;
+        }
+
+        $query = $this->transactions()
+            ->where('type', Transaction::TYPE_DEPOSIT)
+            ->where('confirmed', false)
+            ->where('amount', $amount * 100);
+
+        if ($minutes) {
+            $query->where('created_at', '>', now()->subMinutes($minutes));
+        }
+
+        return $query->exists();
     }
 
     public function getReferralIncentive(int $level): float

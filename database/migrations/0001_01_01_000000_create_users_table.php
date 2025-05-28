@@ -24,6 +24,21 @@ return new class extends Migration
             $table->rememberToken();
             $table->string('rank')->default(UserRank::UNRANKED->value);
             $table->boolean('is_active')->default(false);
+
+            $table->integer('total_deposit')->default(0);
+            $table->integer('total_income')->default(0);
+            $table->integer('total_withdraw')->default(0);
+            $table->integer('referral_income')->default(0);
+            $table->integer('generation_income')->default(0);
+            $table->integer('rank_income')->default(0);
+            $table->integer('magic_income')->default(0);
+            $table->integer('pending_deposit')->default(0);
+            $table->integer('rejected_deposit')->default(0);
+            $table->integer('pending_withdraw')->default(0);
+            $table->integer('rejected_withdraw')->default(0);
+            $table->integer('total_send')->default(0);
+            $table->integer('total_receive')->default(0);
+
             $table->timestamps();
         });
 
