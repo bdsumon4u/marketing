@@ -12,6 +12,7 @@ use Filament\Pages\Auth\Register as BaseRegister;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class Register extends BaseRegister
 {
@@ -21,6 +22,12 @@ class Register extends BaseRegister
             ->schema([
                 $this->getNameFormComponent(),
                 $this->getEmailFormComponent(),
+                PhoneInput::make('phone')
+                    ->label('Phone Number')
+                    ->required()
+                    ->disallowDropdown()
+                    ->defaultCountry('BD')
+                    ->initialCountry('BD'),
                 Forms\Components\Grid::make(2)
                     ->schema([
                         $this->getPasswordFormComponent(),
@@ -45,32 +52,13 @@ class Register extends BaseRegister
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                'referrer_id' => $referrer->id,
+                'phone' => $data['phone'],
+                'password' => $data['password'],
+                'referrer_id' => $referrer?->id,
             ]);
-
-            // Get registration fee from config
-            $registrationFee = config('mlm.registration_fee');
-
-            // Distribute registration fee to company wallets
-            foreach (Wallet::company()->wallets as $wallet) {
-                $percentageShare = $wallet->meta['percentage_share'] ?? 0;
-                $amount = ($registrationFee * $percentageShare) / 100;
-                $wallet->deposit($amount, [
-                    'description' => 'Registration fee distribution',
-                    'user_id' => $user->id,
-                ]);
-            }
 
             // Dispatch job to process MLM incentives
             ProcessMLMIncentives::dispatch($user, $referrer);
-
-            Log::info('New referral registered', [
-                'referrer_id' => $referrer->id,
-                'referred_user_id' => $user->id,
-                'username' => $data['username'],
-                'registration_fee' => $registrationFee,
-            ]);
 
             return $user;
         });

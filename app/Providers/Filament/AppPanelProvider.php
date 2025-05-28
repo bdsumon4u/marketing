@@ -30,7 +30,7 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->login()
             ->registration(Register::class)
-            // ->emailVerification()
+            ->emailVerification()
             ->passwordReset()
             ->profile(isSimple: false)
             ->colors([

@@ -13,10 +13,17 @@ class DashboardStats extends Widget
 
     protected int | string | array $columnSpan = 'full';
 
+    protected function getListeners(): array
+    {
+        return [
+            'refresh-balance' => '$refresh',
+        ];
+    }
+
     public function getReferralLink(): string
     {
         return Filament::getPanel()->getRegistrationUrl([
-            'ref' => Filament::auth()->user()->referral_code,
+            'ref' => Filament::auth()->user()->username,
         ]);
     }
 

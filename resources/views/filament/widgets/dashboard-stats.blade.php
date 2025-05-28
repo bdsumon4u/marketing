@@ -1,4 +1,23 @@
 <x-filament::widget>
+    @if(!auth()->user()->is_active)
+        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+            <div class="flex items-center">
+                <svg class="flex-shrink-0 inline w-4 h-4 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                </svg>
+                <span class="font-medium">This account is not verified.</span>
+                @if(auth()->user()->balanceFloat < config('mlm.registration_fee'))
+                    <button wire:click="$dispatch('open-modal', { id: 'add-fund-modal' })" class="ml-2 font-medium underline hover:no-underline">
+                        DEPOSIT NOW
+                    </button>
+                    <span class="ml-2">at least <strong>{{ config('mlm.registration_fee') }} BDT</strong> to verify your account</span>
+                @else
+                    <a href="" class="ml-2 font-medium underline hover:no-underline">VERIFY NOW</a>
+                @endif
+            </div>
+        </div>
+    @endif
+
     @php
         $colorMap = [
             'primary' => ['bg' => 'bg-blue-50 dark:bg-blue-900', 'icon' => 'text-blue-500 dark:text-blue-300', 'amount' => 'text-blue-600 dark:text-blue-200'],
