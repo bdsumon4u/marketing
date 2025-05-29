@@ -2,16 +2,12 @@
 
 namespace App\Filament\Pages\Auth;
 
-use App\Jobs\ProcessMLMIncentives;
 use App\Models\User;
-use App\Models\Wallet;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Auth\Register as BaseRegister;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class Register extends BaseRegister

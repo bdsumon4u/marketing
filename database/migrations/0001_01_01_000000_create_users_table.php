@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->string('rank')->default(UserRank::UNRANKED->value);
+            $table->string('rank')->default(UserRank::_M);
             $table->boolean('is_active')->default(false);
 
             $table->integer('total_deposit')->default(0);

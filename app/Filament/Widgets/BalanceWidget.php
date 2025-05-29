@@ -13,7 +13,7 @@ use Illuminate\Support\Number;
 
 class BalanceWidget extends BaseWidget
 {
-//     protected static ?string $pollingInterval = null;
+    // protected static ?string $pollingInterval = null;
 
     protected function getListeners(): array
     {
@@ -26,7 +26,6 @@ class BalanceWidget extends BaseWidget
     {
         return Filament::auth()->user();
     }
-
 
     protected function getStats(): array
     {

@@ -4,8 +4,6 @@ namespace App\Filament\Admin\Pages;
 
 use App\Models\User;
 use App\Models\Wallet;
-use Filament\Pages\Page;
-
 use Filament\Pages\Dashboard as DashboardPage;
 use Livewire\Attributes\Computed;
 
@@ -16,13 +14,13 @@ class Dashboard extends DashboardPage
     #[Computed(true)]
     public function totalDeposit(): float
     {
-        return User::sum('total_deposit');
+        return round(User::sum('total_deposit') / 100, 2);
     }
 
     #[Computed(true)]
     public function totalWithdraw(): float
     {
-        return User::sum('total_withdraw');
+        return round(User::sum('total_withdraw') / 100, 2);
     }
 
     #[Computed(true)]
@@ -36,24 +34,24 @@ class Dashboard extends DashboardPage
     #[Computed(true)]
     public function pendingDeposit(): float
     {
-        return User::sum('pending_deposit');
+        return round(User::sum('pending_deposit') / 100, 2);
     }
 
     #[Computed(true)]
     public function rejectedDeposit(): float
     {
-        return User::sum('rejected_deposit');
+        return round(User::sum('rejected_deposit') / 100, 2);
     }
 
     #[Computed(true)]
     public function pendingWithdraw(): float
     {
-        return User::sum('pending_withdraw');
+        return round(User::sum('pending_withdraw') / 100, 2);
     }
 
     #[Computed(true)]
     public function rejectedWithdraw(): float
     {
-        return User::sum('rejected_withdraw');
+        return round(User::sum('rejected_withdraw') / 100, 2);
     }
 }

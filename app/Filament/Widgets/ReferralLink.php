@@ -11,7 +11,7 @@ class ReferralLink extends Widget
 {
     protected static string $view = 'filament.widgets.referral-link';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected function user(): User
     {

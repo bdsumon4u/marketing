@@ -4,16 +4,18 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Casts\Money;
 use App\Enums\UserRank;
+use Bavix\Wallet\Interfaces\Confirmable;
 use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Interfaces\WalletFloat;
 use Bavix\Wallet\Models\Transaction;
+use Bavix\Wallet\Traits\CanConfirm;
 use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Traits\HasWallets;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,10 +23,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wallet
+class User extends Authenticatable implements Confirmable, FilamentUser, MustVerifyEmail, Wallet
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasWalletFloat, HasWallets, Notifiable;
+    use CanConfirm, HasFactory, HasWalletFloat, HasWallets, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -64,6 +66,19 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Wal
             'password' => 'hashed',
             'is_active' => 'boolean',
             'rank' => UserRank::class,
+            'total_deposit' => Money::class,
+            'total_income' => Money::class,
+            'total_withdraw' => Money::class,
+            'referral_income' => Money::class,
+            'generation_income' => Money::class,
+            'rank_income' => Money::class,
+            'magic_income' => Money::class,
+            'pending_deposit' => Money::class,
+            'rejected_deposit' => Money::class,
+            'pending_withdraw' => Money::class,
+            'rejected_withdraw' => Money::class,
+            'total_send' => Money::class,
+            'total_receive' => Money::class,
         ];
     }
 

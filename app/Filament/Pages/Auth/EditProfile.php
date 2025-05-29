@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Auth;
 
 use Filament\Forms;
 use Filament\Pages\Auth\EditProfile as BaseEditProfile;
+
 /**
  * @property Form $form
  */

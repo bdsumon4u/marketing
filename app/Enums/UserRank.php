@@ -9,5 +9,5 @@ enum UserRank: string
     case CM = 'CM';
     case DM = 'DM';
     case EM = 'EM';
-    case UNRANKED = 'UNRANKED';
+    case _M = '_M';
 }

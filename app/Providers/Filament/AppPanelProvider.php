@@ -5,6 +5,8 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Dashboard;
+use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -13,12 +15,14 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
@@ -45,7 +49,7 @@ class AppPanelProvider extends PanelProvider
             ->sidebarWidth('16rem')
             ->sidebarCollapsibleOnDesktop()
             ->databaseNotifications()
-            ->databaseNotificationsPolling(null)
+            // ->databaseNotificationsPolling(null)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -71,6 +75,17 @@ class AppPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->viteTheme('resources/css/filament/app/theme.css')
-            ->spa();
+            ->spa()
+            ->renderHook(
+                PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+                fn () => Blade::render('
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-gray-500">Rank:</span>
+                        <x-filament::badge color="primary">
+                            '.value(fn (): User => Filament::auth()->user())->rank->name.'
+                        </x-filament::badge>
+                    </div>
+                '),
+            );
     }
 }

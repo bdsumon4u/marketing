@@ -6,14 +6,16 @@ use App\Jobs\ProcessMLMIncentives;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
+use Filament\Widgets\Concerns\CanPoll;
 use Filament\Widgets\Widget;
-use Livewire\Attributes\Computed;
 
 class DashboardStats extends Widget
 {
+    use CanPoll;
+
     protected static string $view = 'filament.widgets.dashboard-stats';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected function getListeners(): array
     {
@@ -35,14 +37,16 @@ class DashboardStats extends Widget
                 ->info()
                 ->title('Account already verified!')
                 ->send();
+
             return;
         }
         if ($this->user()->balanceFloat < $registrationFee) {
             Notification::make()
                 ->danger()
                 ->title('Insufficient balance!')
-                ->body('You need at least ' . $registrationFee . ' BDT to verify your account.')
+                ->body('You need at least '.$registrationFee.' BDT to verify your account.')
                 ->send();
+
             return;
         }
         ProcessMLMIncentives::dispatch($this->user());

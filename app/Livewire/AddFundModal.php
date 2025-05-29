@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Admin;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
@@ -11,8 +12,6 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Number;
 use Livewire\Component;
-
-use function Laravel\Prompts\confirm;
 
 class AddFundModal extends Component implements HasForms
 {
@@ -33,8 +32,9 @@ class AddFundModal extends Component implements HasForms
                     ->label('Amount')
                     ->numeric()
                     ->required()
-                    ->prefix('$')
-                    ->minValue(1),
+                    ->minValue(1)
+                    ->autofocus()
+                    ->prefix(Number::defaultCurrency()),
             ])
             ->statePath('data');
     }
@@ -48,13 +48,14 @@ class AddFundModal extends Component implements HasForms
             Notification::make()
                 ->danger()
                 ->title('Duplicate deposit request')
-                ->body('Please wait at least ' . $minutes . ' minutes before making another deposit request for the same amount.')
+                ->body('Please wait at least '.$minutes.' minutes before making another deposit request for the same amount.')
                 ->send();
+
             return;
         }
 
         $user->depositFloat($data['amount'], confirmed: false);
-        $user->increment('pending_deposit', $data['amount']);
+        $user->increment('pending_deposit', $data['amount'] * 100);
         $this->dispatch('refresh-balance');
 
         $this->form->fill();
@@ -62,9 +63,15 @@ class AddFundModal extends Component implements HasForms
         Notification::make()
             ->success()
             ->title('Fund deposit is pending...')
-            ->body(Number::currency($data['amount']) . ' BDT is being added to your account. Please wait for confirmation...')
+            ->body(Number::currency($data['amount']).' BDT is being added to your account. Please wait for confirmation...')
             ->sendToDatabase($user)
             ->send();
+
+        Notification::make()
+            ->info()
+            ->title('New deposit request')
+            ->body('A new deposit request has been made by @'.$user->username.' for '.Number::currency($data['amount']).' BDT.')
+            ->sendToDatabase(Admin::all());
 
         $this->dispatch('close-modal', id: 'add-fund-modal');
     }

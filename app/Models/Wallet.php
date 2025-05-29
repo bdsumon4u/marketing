@@ -16,9 +16,9 @@ class Wallet extends BavixWallet
     public static function company(): self
     {
         return self::$company ??= static::firstOrCreate(
-            ['slug' => CompanyWalletType::COMPANY->value],
+            ['slug' => 'company'],
             [
-                'name' => CompanyWalletType::COMPANY->name(),
+                'name' => 'Company',
                 'holder_type' => static::class,
                 'uuid' => Str::uuid(),
                 'holder_id' => 0,
