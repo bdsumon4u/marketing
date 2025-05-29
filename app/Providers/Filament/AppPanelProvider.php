@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Dashboard;
 use Filament\FontProviders\GoogleFontProvider;
@@ -32,7 +33,7 @@ class AppPanelProvider extends PanelProvider
             ->registration(Register::class)
             ->emailVerification()
             ->passwordReset()
-            ->profile(isSimple: false)
+            ->profile(EditProfile::class, isSimple: false)
             ->colors([
                 'primary' => Color::Blue,
             ])
