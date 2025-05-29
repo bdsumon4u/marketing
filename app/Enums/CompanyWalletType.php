@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-enum CompanyWalletType: string
+use Filament\Support\Contracts\HasColor;
+
+enum CompanyWalletType: string implements HasColor
 {
     case AM_FUND = 'am-fund';
     case BM_FUND = 'bm-fund';
@@ -20,6 +22,18 @@ enum CompanyWalletType: string
             self::DM_FUND => 'DM Fund',
             self::EM_FUND => 'EM Fund',
             self::COMPANY => 'Company',
+        };
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::AM_FUND => 'primary',
+            self::BM_FUND => 'success',
+            self::CM_FUND => 'info',
+            self::DM_FUND => 'warning',
+            self::EM_FUND => 'danger',
+            self::COMPANY => 'primary',
         };
     }
 

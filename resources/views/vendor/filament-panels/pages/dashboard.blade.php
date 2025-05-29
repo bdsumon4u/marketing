@@ -13,6 +13,4 @@
         "
         :widgets="$this->getVisibleWidgets()"
     />
-    <livewire:add-fund-modal />
-    <livewire:withdraw-modal />
 </x-filament-panels::page>

@@ -29,6 +29,10 @@ class Wallet extends BavixWallet
     public static function createDefaultWallets(): void
     {
         foreach (CompanyWalletType::all() as $wallet) {
+            if (self::company()->hasWallet($wallet['slug'])) {
+                continue;
+            }
+
             self::company()->createWallet([
                 'name' => $wallet['name'],
                 'slug' => $wallet['slug'],
