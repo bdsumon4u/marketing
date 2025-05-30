@@ -12,20 +12,16 @@
                         d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
                 </svg>
                 <span class="font-medium">This account is not verified.</span>
-                @if(auth()->user()->balanceFloat < config('mlm.registration_fee'))
+                @if(auth()->user()->balanceFloat < config('mlm.registration_fee.without_product'))
                     <button
                         wire:click="$dispatch('open-modal', { id: 'add-fund-modal' })"
                         class="ml-1 font-medium underline hover:no-underline"
                     >
                         DEPOSIT NOW
                     </button>
-                    <span class="ml-1">
-                        at least
-                        <strong>{{ config('mlm.registration_fee') - auth()->user()->balanceFloat }} BDT</strong>
-                        to verify your account
-                    </span>
+                    <span class="ml-1">to verify your account</span>
                 @else
-                <button wire:click="verifyAccount" class="ml-1 font-medium underline hover:no-underline">VERIFY NOW</button>
+                <button wire:click="$dispatch('open-modal', { id: 'verify-now-modal' })" class="ml-1 font-medium underline hover:no-underline">VERIFY NOW</button>
                 @endif
             </div>
         @endif

@@ -10,6 +10,8 @@ return [
     |
     */
 
-    // Registration fee in taka
-    'registration_fee' => env('MLM_REGISTRATION_FEE', 200),
+    'registration_fee' => [
+        'with_product' => 1000,
+        'without_product' => 500,
+    ],
 ];

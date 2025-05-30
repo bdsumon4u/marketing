@@ -34,7 +34,7 @@ class Register extends BaseRegister
                     ->exists('users', 'username')
                     ->validationAttribute('referrer')
                     ->helperText('Enter the username of the person who referred you')
-                    ->default(fn () => request()->cookie('referrer')),
+                    ->default(fn () => request('ref') ?? request()->cookie('referral_code')),
             ]);
     }
 

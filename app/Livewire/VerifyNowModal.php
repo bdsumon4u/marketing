@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Admin;
+use App\Jobs\ProcessMLMIncentives;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Radio;
@@ -10,6 +10,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Arr;
 use Livewire\Component;
 
 class VerifyNowModal extends Component implements HasForms
@@ -33,9 +34,8 @@ class VerifyNowModal extends Component implements HasForms
                         'with_product' => 'With Product (Tk. 1,000)',
                         'without_product' => 'Without Product (Tk. 500)',
                     ])
-                    ->required()
-                    ->inline()
-                    ->default('without_product'),
+                    ->columns(2)
+                    ->required(),
             ])
             ->statePath('data');
     }
@@ -45,41 +45,33 @@ class VerifyNowModal extends Component implements HasForms
         $data = $this->form->getState();
         $user = value(fn (): User => Filament::auth()->user());
 
-        $amount = match ($data['package']) {
-            'with_product' => 1000,
-            'without_product' => 500,
-        };
-
-        if ($user->balanceFloat < $amount) {
+        if ($user->is_active) {
             Notification::make()
-                ->danger()
-                ->title('Insufficient balance')
-                ->body('Please add funds to your account first.')
+                ->info()
+                ->title('Account already verified!')
                 ->send();
 
             return;
         }
 
-        $user->update(['is_active' => true]);
-        $user->withdrawFloat($amount, [
-            'action' => 'verification',
-            'message' => 'Account Verification - '.($data['package'] === 'with_product' ? 'With Product' : 'Without Product'),
-        ]);
+        $amount = Arr::get(config('mlm.registration_fee'), $data['package']);
 
-        $this->dispatch('refresh-balance');
+        if ($user->balanceFloat < $amount) {
+            Notification::make()
+                ->danger()
+                ->title('Insufficient balance!')
+                ->body('You need at least '.$amount.' BDT to verify your account.')
+                ->send();
+
+            return;
+        }
+
+        ProcessMLMIncentives::dispatch($user, $data['package']);
 
         Notification::make()
             ->success()
-            ->title('Account verified successfully!')
-            ->body('Your account has been verified. You can now use all features.')
-            ->sendToDatabase($user)
+            ->title('Account is being verified...')
             ->send();
-
-        Notification::make()
-            ->info()
-            ->title('New account verification')
-            ->body('@'.$user->username.' has verified their account with '.($data['package'] === 'with_product' ? 'With Product' : 'Without Product').' package.')
-            ->sendToDatabase(Admin::all());
 
         $this->dispatch('close-modal', id: 'verify-now-modal');
     }

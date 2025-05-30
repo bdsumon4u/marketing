@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 
 class ProcessMLMIncentives implements ShouldQueue
@@ -21,6 +22,7 @@ class ProcessMLMIncentives implements ShouldQueue
      */
     public function __construct(
         protected User $newUser,
+        protected string $package,
     ) {}
 
     /**
@@ -28,84 +30,57 @@ class ProcessMLMIncentives implements ShouldQueue
      */
     public function handle(): void
     {
-        $registrationFee = config('mlm.registration_fee');
-        if ($this->newUser->balanceFloat < $registrationFee) {
+        if ($this->newUser->balanceFloat < Arr::get(config('mlm.registration_fee'), $this->package)) {
+            info('Insufficient balance');
             return;
         }
-        $this->newUser->update(['is_active' => true]);
+        info('Building referral chain');
         $referralChain = $this->buildReferralChain($this->newUser);
-
+        info('Referral chain built');
+        $registrationFee = config('mlm.registration_fee.without_product');
         $distributedAmount = 0;
         foreach ($referralChain as $index => $referrer) {
             $level = $index + 1;
-            $incentivePercentage = $referrer->getReferralIncentive($level);
-            $incentiveAmount = ($registrationFee * $incentivePercentage) / 100;
+            $incentiveAmount = $referrer->getReferralIncentive($level);
             $distributedAmount += $incentiveAmount;
-            // Credit the referrer's wallet
-            // $referrer->deposit($incentiveAmount, [
-            //     'description' => "Referral incentive for level {$level}",
-            //     'meta' => [
-            //         'level' => $level,
-            //         'type' => 'referral',
-            //         'amount' => $incentiveAmount,
-            //         'percentage' => $incentivePercentage,
-            //         'referred_user_id' => $this->newUser->id,
-            //     ],
-            // ]);
             $this->newUser->transferFloat($referrer->getOrCreateWallet('earning'), $incentiveAmount, [
-                'description' => "Referral incentive for level {$level}",
+                'message' => "Referral incentive for level {$level}",
                 'meta' => [
                     'level' => $level,
                     'type' => 'referral',
                     'amount' => $incentiveAmount,
-                    'percentage' => $incentivePercentage,
                     'referred_user_id' => $this->newUser->id,
                 ],
             ]);
-
-            Log::info('MLM incentive credited', [
-                'referrer_id' => $referrer->id,
-                'referred_user_id' => $this->newUser->id,
-                'level' => $level,
-                'percentage' => $incentivePercentage,
-                'amount' => $incentiveAmount,
-            ]);
         }
-
-        // Distribute registration fee to company wallets (CompanyWalletType::COMPANY, etc.)
+        info('Transferring registration fee');
+        $companyWallet = Wallet::company()->getWallet(CompanyWalletType::COMPANY->value);
+        $this->newUser->transferFloat($companyWallet, $registrationFee, [
+            'message' => 'Registration fee',
+            'user_id' => $this->newUser->id,
+        ]);
+        info('Registration fee debited');
         foreach (Wallet::company()->wallets()->with('holder')->oldest('id')->get() as $wallet) {
             if ($wallet->slug === CompanyWalletType::COMPANY->value) {
-                $amount = $registrationFee - $distributedAmount;
-            } else {
-                $percentageShare = $wallet->meta['percentage_share'] ?? 0;
-                $amount = ($registrationFee * $percentageShare) / 100;
+                continue;
             }
-            // $wallet->deposit($amount, [
-            //     'description' => 'Registration fee distribution',
-            //     'user_id' => $this->newUser->id,
-            // ]);
-            $this->newUser->transferFloat($wallet, $amount, [
-                'description' => 'Registration fee distribution',
+            $amount = CompanyWalletType::from($wallet->slug)->getIncentive();
+            $companyWallet->transferFloat($wallet, $amount, [
+                'message' => 'Registration fee distribution',
                 'user_id' => $this->newUser->id,
             ]);
             $distributedAmount += $amount;
-            Log::info('Company wallet credited', [
-                'wallet_id' => $wallet->id,
-                'wallet_slug' => $wallet->slug,
-                'wallet_name' => $wallet->name,
-                'amount' => $amount,
-                'percentage_share' => $percentageShare,
-                'description' => 'Registration fee distribution',
+        }
+        info('Company wallets distributed');
+        if ($this->package === 'with_product') {
+            $productFund = config('mlm.registration_fee.with_product') - $registrationFee;
+            $this->newUser->transferFloat($this->newUser->getOrCreateWallet('product'), $productFund, [
+                'message' => 'Product fund',
                 'user_id' => $this->newUser->id,
             ]);
         }
-
-        Log::info('New referral registered', [
-            'referrer_id' => $this->newUser->referrer?->id,
-            'referred_user_id' => $this->newUser->id,
-            'referrer' => $this->newUser->referrer?->username,
-            'registration_fee' => $registrationFee,
-        ]);
+        info('Product fund distributed');
+        $this->newUser->update(['is_active' => true]);
     }
 
     protected function buildReferralChain(?User $newUser, int $depth = 10): array

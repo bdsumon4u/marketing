@@ -59,7 +59,7 @@ class AddFundModal extends Component implements HasForms
 
         $user->depositFloat($data['amount'], [
             'action' => 'deposit',
-            'message' => 'Fund Deposit',
+            'message' => 'Fund deposit',
             'reference' => $user->username,
             'transaction_id' => $data['transaction_id'],
         ], false);

@@ -9,10 +9,6 @@
     <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
         <div class="font-medium">Verification Process</div>
         <p class="mt-1">Please select a package to verify your account:</p>
-        <ul class="mt-2 list-disc list-inside">
-            <li>With Product: Tk. 1,000</li>
-            <li>Without Product: Tk. 500</li>
-        </ul>
     </div>
 
     <form wire:submit="submit">
@@ -23,7 +19,7 @@
                 type="submit"
                 color="primary"
             >
-                Verify Now
+                Request Verification
             </x-filament::button>
         </div>
     </form>

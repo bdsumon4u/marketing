@@ -7,9 +7,10 @@ namespace App\Models;
 use App\Casts\Money;
 use App\Enums\UserRank;
 use Bavix\Wallet\Interfaces\Confirmable;
-use Bavix\Wallet\Interfaces\Wallet;
-use Bavix\Wallet\Interfaces\WalletFloat;
+use Bavix\Wallet\Interfaces\Wallet as WalletInterface;
+use Bavix\Wallet\Interfaces\WalletFloat as WalletFloatInterface;
 use Bavix\Wallet\Models\Transaction;
+use Bavix\Wallet\Models\Wallet as WalletModel;
 use Bavix\Wallet\Traits\CanConfirm;
 use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Traits\HasWallets;
@@ -23,7 +24,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable implements Confirmable, FilamentUser, MustVerifyEmail, Wallet
+class User extends Authenticatable implements Confirmable, FilamentUser, MustVerifyEmail, WalletInterface, WalletFloatInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use CanConfirm, HasFactory, HasWalletFloat, HasWallets, Notifiable;
@@ -119,7 +120,7 @@ class User extends Authenticatable implements Confirmable, FilamentUser, MustVer
         return $code;
     }
 
-    public function getOrCreateWallet(string $slug = 'default'): WalletFloat
+    public function getOrCreateWallet(string $slug = 'default'): WalletModel
     {
         return $this->wallets()->firstOrCreate(
             ['slug' => $slug],
@@ -154,12 +155,15 @@ class User extends Authenticatable implements Confirmable, FilamentUser, MustVer
         }
 
         return match ($level) {
-            1 => 25.0, // 25%
+            1 => 20.0, // 20%
             2 => 5.0,  // 5%
-            3 => 4.0,  // 4%
-            4, 5 => 3.0, // 3%
-            default => 2.0, // 2%
-        };
+            3 => 3.0,  // 3%
+            4, 5, 6, 7 => 2.0, // 2%
+            8 => 1.6, // 1.6%
+            9 => 1.4, // 1.4%
+            10 => 1.0, // 1%
+            default => 0, // 2%
+        } * config('mlm.registration_fee.without_product') / 100;
     }
 
     public function canAccessPanel(Panel $panel): bool

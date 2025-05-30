@@ -21,14 +21,4 @@ class DashboardStats extends Widget
             'refresh-balance' => '$refresh',
         ];
     }
-
-    protected function user(): User
-    {
-        return Filament::auth()->user();
-    }
-
-    public function verifyAccount(): void
-    {
-        $this->dispatch('open-modal', id: 'verify-now-modal');
-    }
 }

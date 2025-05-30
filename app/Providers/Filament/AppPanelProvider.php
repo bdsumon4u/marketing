@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Dashboard;
+use App\Http\Middleware\HandleReferralCode;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\FontProviders\GoogleFontProvider;
@@ -70,6 +71,7 @@ class AppPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                HandleReferralCode::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -92,6 +94,7 @@ class AppPanelProvider extends PanelProvider
                 fn () => Filament::auth()->check() ? Blade::render('
                     <livewire:add-fund-modal />
                     <livewire:withdraw-modal />
+                    <livewire:verify-now-modal />
                 ') : null,
             );
     }
