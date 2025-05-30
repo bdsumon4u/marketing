@@ -35,6 +35,9 @@ class AddFundModal extends Component implements HasForms
                     ->minValue(1)
                     ->autofocus()
                     ->prefix(Number::defaultCurrency()),
+                TextInput::make('transaction_id')
+                    ->label('Transaction ID')
+                    ->required(),
             ])
             ->statePath('data');
     }
@@ -54,7 +57,12 @@ class AddFundModal extends Component implements HasForms
             return;
         }
 
-        $user->depositFloat($data['amount'], confirmed: false);
+        $user->depositFloat($data['amount'], [
+            'action' => 'deposit',
+            'message' => 'Fund Deposit',
+            'reference' => $user->username,
+            'transaction_id' => $data['transaction_id'],
+        ], false);
         $user->increment('pending_deposit', $data['amount'] * 100);
         $this->dispatch('refresh-balance');
 

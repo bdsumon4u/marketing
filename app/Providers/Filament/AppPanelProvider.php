@@ -86,6 +86,13 @@ class AppPanelProvider extends PanelProvider
                         </x-filament::badge>
                     </div>
                 '),
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => Filament::auth()->check() ? Blade::render('
+                    <livewire:add-fund-modal />
+                    <livewire:withdraw-modal />
+                ') : null,
             );
     }
 }
