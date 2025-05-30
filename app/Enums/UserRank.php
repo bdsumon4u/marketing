@@ -2,12 +2,23 @@
 
 namespace App\Enums;
 
-enum UserRank: string
+enum UserRank: int
 {
-    case AM = 'AM';
-    case BM = 'BM';
-    case CM = 'CM';
-    case DM = 'DM';
-    case EM = 'EM';
-    case _M = '_M';
+    case _M = 0;
+    case AM = 1;
+    case BM = 2;
+    case CM = 3;
+    case DM = 4;
+    case EM = 5;
+    case FM = 6;
+
+    public static function values(): array
+    {
+        return array_map(fn (UserRank $rank) => $rank->value, self::cases());
+    }
+
+    public static function getMaximumRank(): int
+    {
+        return self::FM->value;
+    }
 }

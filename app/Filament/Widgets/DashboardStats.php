@@ -2,8 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\User;
-use Filament\Facades\Filament;
 use Filament\Widgets\Concerns\CanPoll;
 use Filament\Widgets\Widget;
 

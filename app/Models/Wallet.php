@@ -38,7 +38,6 @@ class Wallet extends BavixWallet implements WalletInterface
             self::company()->createWallet([
                 'name' => $wallet['name'],
                 'slug' => $wallet['slug'],
-                'meta' => ['percentage_share' => $wallet['percentage_share']],
             ]);
         }
     }

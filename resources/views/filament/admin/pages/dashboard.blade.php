@@ -86,18 +86,19 @@
 
     @foreach ($rows as $i => $row)
     <div class="grid gap-4 mb-4
-            @if(count($row) === 3) grid-cols-1 md:grid-cols-3 @endif
-            @if(count($row) === 4) grid-cols-1 md:grid-cols-4 @endif
-            @if(count($row) === 2) grid-cols-1 md:grid-cols-2 @endif
-            @if(count($row) === 5) grid-cols-1 md:grid-cols-5 @endif
-        ">
+        @if(count($row) === 2) grid-cols-1 md:grid-cols-2 @endif
+        @if(count($row) === 3) grid-cols-1 md:grid-cols-3 @endif
+        @if(count($row) === 4) grid-cols-1 md:grid-cols-4 @endif
+        @if(count($row) === 5) grid-cols-1 md:grid-cols-5 @endif
+        @if(count($row) === 6) grid-cols-1 md:grid-cols-6 @endif
+    ">
         @foreach ($row as $stat)
         <div @class([ 'rounded-xl shadow p-4 flex items-center min-h-[90px]' , $colorMap[$stat['color']]['bg'], ])>
             <x-dynamic-component :component="$stat['icon']" @class([ 'w-12 h-12 flex-shrink-0' ,
                 $colorMap[$stat['color']]['icon'], ]) />
             <div class="flex flex-col items-end justify-between flex-1 h-full ml-4">
                 <div class="text-base font-bold text-right">{{ $stat['label'] }}</div>
-                <div @class([ 'text-2xl font-extrabold text-right' , $colorMap[$stat['color']]['amount'], ])>
+                <div @class([ 'text-lg font-extrabold text-right' , $colorMap[$stat['color']]['amount'], ])>
                     {{ is_numeric($stat['value']) ? number_format($stat['value'], 2) : $stat['value'] }}
                 </div>
             </div>

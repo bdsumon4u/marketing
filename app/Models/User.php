@@ -24,7 +24,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable implements Confirmable, FilamentUser, MustVerifyEmail, WalletInterface, WalletFloatInterface
+class User extends Authenticatable implements Confirmable, FilamentUser, MustVerifyEmail, WalletFloatInterface, WalletInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use CanConfirm, HasFactory, HasWalletFloat, HasWallets, Notifiable;
@@ -162,8 +162,13 @@ class User extends Authenticatable implements Confirmable, FilamentUser, MustVer
             8 => 1.6, // 1.6%
             9 => 1.4, // 1.4%
             10 => 1.0, // 1%
-            default => 0, // 2%
+            default => 0, // 0%
         } * config('mlm.registration_fee.without_product') / 100;
+    }
+
+    public function getMagicIncome(): float
+    {
+        return 1.0 * config('mlm.registration_fee.without_product') / 100;
     }
 
     public function canAccessPanel(Panel $panel): bool

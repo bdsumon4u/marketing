@@ -14,7 +14,7 @@ class ListTransactions extends ListRecords
     {
         return [
             // Actions\CreateAction::make(),
-            Actions\Action::make('addFund') # open add-fund modal
+            Actions\Action::make('addFund') // open add-fund modal
                 ->label('Add Fund')
                 ->action(fn () => $this->dispatch('open-modal', id: 'add-fund-modal')),
         ];

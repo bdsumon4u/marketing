@@ -2,7 +2,11 @@
 
 namespace App\Livewire;
 
-use App\Jobs\ProcessMLMIncentives;
+use App\Jobs\ActivateUserAccount;
+use App\Jobs\ProcessCompanyFund;
+use App\Jobs\ProcessMagicIncome;
+use App\Jobs\ProcessReferralIncentive;
+use App\Jobs\ProcessRegistrationFee;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Radio;
@@ -11,6 +15,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Bus;
 use Livewire\Component;
 
 class VerifyNowModal extends Component implements HasForms
@@ -66,7 +71,13 @@ class VerifyNowModal extends Component implements HasForms
             return;
         }
 
-        ProcessMLMIncentives::dispatch($user, $data['package']);
+        Bus::chain([
+            new ProcessRegistrationFee($user, $data['package']),
+            new ProcessCompanyFund($user, $data['package']),
+            new ProcessReferralIncentive($user, $data['package']),
+            new ProcessMagicIncome($user, $data['package']),
+            new ActivateUserAccount($user),
+        ])->dispatch();
 
         Notification::make()
             ->success()

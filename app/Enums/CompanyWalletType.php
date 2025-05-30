@@ -43,8 +43,8 @@ enum CompanyWalletType: string implements HasColor
     public function getIncentive(): float
     {
         return match ($this) {
-            self::AM_FUND => 2.50,
-            self::BM_FUND => 3.50,
+            self::AM_FUND => 2.00,
+            self::BM_FUND => 3.00,
             self::CM_FUND => 4.00,
             self::DM_FUND => 5.00,
             self::EM_FUND => 6.00,
