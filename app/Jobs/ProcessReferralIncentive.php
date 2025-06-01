@@ -33,6 +33,7 @@ class ProcessReferralIncentive implements ShouldQueue
             $incentiveAmount = $referrer->getReferralIncentive($level);
             $distributedAmount += $incentiveAmount;
             $companyWallet->transferFloat($referrer->getOrCreateWallet('earning'), $incentiveAmount, [
+                'action' => 'income',
                 'message' => "Referral incentive for level {$level}",
                 'meta' => [
                     'level' => $level,

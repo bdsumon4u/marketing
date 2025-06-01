@@ -39,9 +39,13 @@ class ListTransfers extends ListRecords
                     }
 
                     if ($receiver = User::query()->where('username', $data['transfer_to'])->first()) {
-                        $sender->transferFloat($receiver, $data['amount'], [
+                        $record = $sender->transferFloat($receiver, $data['amount'], [
+                            'action' => 'transfer',
                             'message' => 'Transfer from #' . $sender->username . ' to #' . $receiver->username,
                         ]);
+
+                        $sender->increment('total_send', $data['amount'] * 100);
+                        $receiver->increment('total_receive', $data['amount'] * 100);
 
                         Notification::make()
                             ->success()
@@ -49,9 +53,9 @@ class ListTransfers extends ListRecords
                             ->body('You\'ve received ' . Number::currency($data['amount']) . ' from #' . $sender->username)
                             ->sendToDatabase($receiver);
 
-                        $action->successNotificationTitle('Transfer success')->success();
+                        $action->successNotificationTitle('Transfer success');
 
-                        return $action->halt();
+                        return $record;
                     }
 
                     $action->failureNotificationTitle('Transfer failed')->failure();

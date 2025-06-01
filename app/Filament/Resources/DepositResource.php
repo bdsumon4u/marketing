@@ -31,12 +31,13 @@ class DepositResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('id', 'desc')
             ->modifyQueryUsing(function (Builder $query) {
                 return $query
                     ->where('type', Transaction::TYPE_DEPOSIT)
-                    ->where('payable_id', Filament::auth()->user()->id)
                     ->where('payable_type', User::class)
+                    ->where('payable_id', Filament::auth()->user()->id)
+                    ->where('meta->action', 'deposit')
                     ->whereRelation('wallet', 'slug', 'default')
                     ->with('wallet');
             })
@@ -62,7 +63,6 @@ class DepositResource extends Resource
                     }),
                 Tables\Columns\IconColumn::make('confirmed')
                     ->boolean()
-                    ->label('Confirmed')
                     ->alignCenter(),
             ])
             ->filters([

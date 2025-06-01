@@ -34,11 +34,12 @@ class DepositResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('id', 'desc')
             ->modifyQueryUsing(function (Builder $query) {
                 return $query
                     ->where('type', Transaction::TYPE_DEPOSIT)
                     ->where('payable_type', User::class)
+                    ->where('meta->action', 'deposit')
                     ->whereRelation('wallet', 'slug', 'default')
                     ->with(['payable', 'wallet']);
             })

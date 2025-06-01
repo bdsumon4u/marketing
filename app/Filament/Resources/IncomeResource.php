@@ -2,20 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TransactionResource\Pages;
+use App\Filament\Resources\IncomeResource\Pages;
+use App\Filament\Resources\IncomeResource\RelationManagers;
+use App\Models\Income;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
 use Filament\Facades\Filament;
+use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Number;
 
-class TransactionResource extends Resource
+class IncomeResource extends Resource
 {
     protected static ?string $model = Transaction::class;
+
+    protected static ?string $modelLabel = 'Income';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -30,29 +36,19 @@ class TransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('id', 'desc')
             ->modifyQueryUsing(function (Builder $query) {
                 return $query
-                    ->where('payable_id', Filament::auth()->user()->id)
+                    ->where('type', Transaction::TYPE_DEPOSIT)
                     ->where('payable_type', User::class)
-                    ->whereRelation('wallet', 'slug', 'default')
-                    ->with('wallet');
+                    ->where('payable_id', Filament::auth()->user()->id)
+                    ->where('meta->action', 'income')
+                    ->whereRelation('wallet', 'slug', 'earning')
+                    ->with(['payable', 'wallet']);
             })
             ->columns([
-                Tables\Columns\TextColumn::make('type')
-                    ->label('Type')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        Transaction::TYPE_DEPOSIT => 'success',
-                        Transaction::TYPE_WITHDRAW => 'danger',
-                        default => 'warning',
-                    })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        Transaction::TYPE_DEPOSIT => 'Credit',
-                        Transaction::TYPE_WITHDRAW => 'Debit',
-                        default => 'Unknown',
-                    }),
-                Tables\Columns\TextColumn::make('payable.username')
+                Tables\Columns\TextColumn::make('meta.message')
+                    ->label('Message')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amountFloat')
@@ -60,10 +56,6 @@ class TransactionResource extends Resource
                     ->formatStateUsing(function (Transaction $record): string {
                         return Number::currency(abs($record->amountFloat));
                     }),
-                Tables\Columns\TextColumn::make('meta.message')
-                    ->label('Message')
-                    ->searchable()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date')
                     ->date()
@@ -96,9 +88,9 @@ class TransactionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTransactions::route('/'),
-            'create' => Pages\CreateTransaction::route('/create'),
-            'edit' => Pages\EditTransaction::route('/{record}/edit'),
+            'index' => Pages\ListIncomes::route('/'),
+            'create' => Pages\CreateIncome::route('/create'),
+            'edit' => Pages\EditIncome::route('/{record}/edit'),
         ];
     }
 }

@@ -33,6 +33,7 @@ class ProcessRegistrationFee implements ShouldQueue
         $registrationFee = config('mlm.registration_fee.without_product');
         $companyWallet = Wallet::company()->getWallet(CompanyWalletType::COMPANY->value);
         $this->user->transferFloat($companyWallet, $registrationFee, [
+            'action' => 'registration',
             'message' => 'Registration fee',
             'user_id' => $this->user->id,
         ]);
@@ -40,6 +41,7 @@ class ProcessRegistrationFee implements ShouldQueue
         if ($this->package === 'with_product') {
             $productFund = config('mlm.registration_fee.with_product') - $registrationFee;
             $this->user->transferFloat($this->user->getOrCreateWallet('product'), $productFund, [
+                'action' => 'registration',
                 'message' => 'Product fund',
                 'user_id' => $this->user->id,
             ]);

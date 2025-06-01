@@ -32,6 +32,7 @@ class ProcessCompanyFund implements ShouldQueue
             }
             $amount = CompanyWalletType::from($wallet->slug)->getIncentive();
             $companyWallet->transferFloat($wallet, $amount, [
+                'action' => 'income',
                 'message' => 'Registration fee distribution',
                 'user_id' => $this->user->id,
             ]);

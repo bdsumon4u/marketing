@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TransferResource\Pages;
+use App\Filament\Resources\WithdrawResource\Pages;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
 use Filament\Facades\Filament;
@@ -13,12 +13,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
-class TransferResource extends Resource
+class WithdrawResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    protected static ?string $modelLabel = 'Transfer';
+    protected static ?string $modelLabel = 'Withdraw';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -26,16 +27,19 @@ class TransferResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('transfer_to')
-                    ->validationAttribute('username')
-                    ->label('Transfer To (username)')
-                    ->exists('users', 'username')
-                    ->default('alexhari')
-                    ->required(),
                 Forms\Components\TextInput::make('amount')
-                    ->prefix(Number::defaultCurrency())
-                    ->default(45)
-                    ->required(),
+                    ->label('Amount')
+                    ->required()
+                    ->numeric()
+                    ->minValue(0)
+                    ->formatStateUsing(fn ($state) => abs($state))
+                    ->prefix(Number::defaultCurrency()),
+                PhoneInput::make('bkash_number')
+                    ->label('bKash Number')
+                    ->required()
+                    ->disallowDropdown()
+                    ->defaultCountry('BD')
+                    ->initialCountry('BD'),
             ])
             ->columns(1);
     }
@@ -46,27 +50,16 @@ class TransferResource extends Resource
             ->defaultSort('id', 'desc')
             ->modifyQueryUsing(function (Builder $query) {
                 return $query
+                    ->where('type', Transaction::TYPE_WITHDRAW)
                     ->where('payable_type', User::class)
                     ->where('payable_id', Filament::auth()->user()->id)
-                    ->where('meta->action', 'transfer')
-                    ->whereRelation('wallet', 'slug', config('wallet.wallet.default.slug'))
-                    ->with('payable', 'wallet');
+                    ->where('meta->action', 'withdraw')
+                    ->whereRelation('wallet', 'slug', 'earning')
+                    ->with('wallet');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('type')
-                    ->label('Type')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        Transaction::TYPE_DEPOSIT => 'success',
-                        Transaction::TYPE_WITHDRAW => 'danger',
-                        default => 'warning',
-                    })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        Transaction::TYPE_DEPOSIT => 'Credit',
-                        Transaction::TYPE_WITHDRAW => 'Debit',
-                        default => 'Unknown',
-                    }),
-                Tables\Columns\TextColumn::make('payable.username')
+                Tables\Columns\TextColumn::make('meta.message')
+                    ->label('Message')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amountFloat')
@@ -74,10 +67,6 @@ class TransferResource extends Resource
                     ->formatStateUsing(function (Transaction $record): string {
                         return Number::currency(abs($record->amountFloat));
                     }),
-                Tables\Columns\TextColumn::make('meta.message')
-                    ->label('Message')
-                    ->searchable()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date')
                     ->date()
@@ -86,12 +75,18 @@ class TransferResource extends Resource
                             Table::$defaultTimeDisplayFormat,
                         );
                     }),
+
+                Tables\Columns\IconColumn::make('confirmed')
+                    ->boolean()
+                    ->alignCenter(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                // Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->slideOver()
+                    ->modalWidth('md'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -110,9 +105,9 @@ class TransferResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTransfers::route('/'),
-            // 'create' => Pages\CreateTransfer::route('/create'),
-            // 'edit' => Pages\EditTransfer::route('/{record}/edit'),
+            'index' => Pages\ListWithdraws::route('/'),
+            // 'create' => Pages\CreateWithdraw::route('/create'),
+            // 'edit' => Pages\EditWithdraw::route('/{record}/edit'),
         ];
     }
 }

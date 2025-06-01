@@ -30,6 +30,7 @@ class ProcessMagicIncome implements ShouldQueue
         $companyWallet = Wallet::company()->getWallet(CompanyWalletType::COMPANY->value);
         foreach ($link as $user) {
             $companyWallet->transferFloat($user->getOrCreateWallet('earning'), $user->getMagicIncome(), [
+                'action' => 'income',
                 'message' => 'Magic income',
                 'user_id' => $this->user->id,
             ]);
