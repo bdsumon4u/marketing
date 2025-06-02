@@ -2,7 +2,7 @@
 
 namespace App\Filament\Admin\Resources;
 
-use App\Filament\Admin\Resources\DepositResource\Pages;
+use App\Filament\Admin\Resources\WithdrawResource\Pages;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
 use Filament\Forms;
@@ -15,11 +15,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 
-class DepositResource extends Resource
+class WithdrawResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    protected static ?string $modelLabel = 'Deposit';
+    protected static ?string $modelLabel = 'Withdraw';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -37,29 +37,36 @@ class DepositResource extends Resource
             ->defaultSort('id', 'desc')
             ->modifyQueryUsing(function (Builder $query) {
                 return $query
-                    ->where('type', Transaction::TYPE_DEPOSIT)
-                    ->where('payable_type', User::class)
-                    ->where('meta->action', 'deposit')
-                    ->whereRelation('wallet', 'slug', 'default')
-                    ->with(['payable', 'wallet']);
+                    ->where('type', Transaction::TYPE_WITHDRAW)
+                    ->where('meta->action', 'withdraw')
+                    ->whereRelation('wallet', 'slug', 'earning')
+                    ->with('wallet');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('payable.name'),
-                Tables\Columns\TextColumn::make('wallet.name'),
+                Tables\Columns\TextColumn::make('payable.name')
+                    ->label('User')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('meta.message')
+                    ->label('Message')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('amountFloat')
                     ->label('Amount')
-                    ->money(),
-                Tables\Columns\IconColumn::make('confirmed')
-                    ->boolean()
-                    ->label('Confirmed')
-                    ->alignCenter(),
+                    ->formatStateUsing(function (Transaction $record): string {
+                        return Number::currency(abs($record->amountFloat));
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Date')
                     ->date()
                     ->tooltip(function (Transaction $record): string {
                         return $record->created_at->format(
                             Table::$defaultTimeDisplayFormat,
                         );
                     }),
+                Tables\Columns\IconColumn::make('confirmed')
+                    ->boolean()
+                    ->alignCenter(),
             ])
             ->filters([
                 //
@@ -71,65 +78,70 @@ class DepositResource extends Resource
                     ->color('success')
                     ->visible(fn (Transaction $record): bool => ! $record->confirmed)
                     ->form([
-                        Forms\Components\TextInput::make('amount')
+                        Forms\Components\TextInput::make('amountFloat')
                             ->label('Amount')
-                            ->formatStateUsing(fn (Transaction $record): string => $record->amountFloat)
+                            ->formatStateUsing(fn (Transaction $record): string => Number::currency(abs($record->amountFloat)))
                             ->disabled(),
-                        Forms\Components\TextInput::make('reference')
-                            ->label('Reference')
-                            ->formatStateUsing(fn (Transaction $record): string => $record->meta['reference'] ?? '')
+                        Forms\Components\TextInput::make('bkash_number')
+                            ->label('bKash Number')
+                            ->formatStateUsing(fn (Transaction $record): string => $record->meta['bkash_number'] ?? '')
                             ->disabled(),
                         Forms\Components\TextInput::make('transaction_id')
                             ->label('Transaction ID')
                             ->formatStateUsing(fn (Transaction $record): string => $record->meta['transaction_id'] ?? '')
-                            ->disabled(),
+                            ->required(),
                     ])
                     ->extraModalFooterActions([
                         Action::make('reject')
                             ->label('Reject')
                             ->color('danger')
-                            ->action(function (Transaction $record): void {
+                            ->action(function (Transaction $record, array $data) {
                                 $user = value(fn (): User => $record->payable);
-                                $user->decrement('pending_deposit', $record->amount);
-                                $user->increment('rejected_deposit', $record->amount);
+                                $user->decrement('pending_withdraw', $record->amount);
+                                $user->increment('rejected_withdraw', $record->amount);
 
                                 Notification::make()
-                                    ->title('Deposit rejected')
-                                    ->body('The deposit has been rejected.')
+                                    ->title('Withdraw rejected')
+                                    ->body('The withdraw has been rejected.')
                                     ->warning()
                                     ->send();
 
                                 // send notification to user
                                 Notification::make()
-                                    ->title('Deposit rejected')
-                                    ->body('The deposit #'.($record->meta['transaction_id'] ?? '').' of '.Number::currency($record->amountFloat).' has been rejected.')
+                                    ->title('Withdraw rejected')
+                                    ->body('The withdraw of '.Number::currency($record->amountFloat).' has been rejected.')
                                     ->danger()
                                     ->sendToDatabase($user);
 
                                 $record->delete();
                             })
                             ->modalWidth('md')
-                            ->modalHeading('Reject Deposit')
-                            ->modalDescription('Are you sure you want to reject this deposit?')
+                            ->modalHeading('Reject Withdraw')
+                            ->modalDescription('Are you sure you want to reject this withdraw?')
                             ->modalSubmitActionLabel('Yes, reject')
                             ->cancelParentActions(),
                     ])
-                    ->action(function (Transaction $record): void {
+                    ->action(function (Transaction $record, array $data) {
                         $user = value(fn (): User => $record->payable);
-                        $user->confirm($record);
-                        $user->decrement('pending_deposit', $record->amount);
-                        $user->increment('total_deposit', $record->amount);
+                        $wallet = $user->getOrCreateWallet('earning');
+                        $wallet->confirm($record);
+                        $meta = $record->meta;
+                        $meta['transaction_id'] = $data['transaction_id'];
+                        $record->meta = $meta;
+                        $record->save();
+                        $user->decrement('pending_withdraw', $record->amount);
+                        $user->increment('total_withdraw', $record->amount);
 
                         Notification::make()
-                            ->title('Deposit confirmed')
-                            ->body('The deposit has been confirmed.')
+                            ->title('Withdraw confirmed')
+                            ->body('The withdraw has been confirmed.')
                             ->success()
                             ->send();
 
                         // send notification to user
                         Notification::make()
-                            ->title('Deposit confirmed')
-                            ->body('The deposit of '.Number::currency($record->amountFloat).' has been confirmed.')
+                            ->title('Withdraw confirmed')
+                            ->body('The withdraw of '.Number::currency($record->amountFloat).' has been confirmed.')
                             ->success()
                             ->sendToDatabase($user);
                     })
@@ -155,9 +167,9 @@ class DepositResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDeposits::route('/'),
-            // 'create' => Pages\CreateDeposit::route('/create'),
-            // 'edit' => Pages\EditDeposit::route('/{record}/edit'),
+            'index' => Pages\ListWithdraws::route('/'),
+            // 'create' => Pages\CreateWithdraw::route('/create'),
+            // 'edit' => Pages\EditWithdraw::route('/{record}/edit'),
         ];
     }
 }

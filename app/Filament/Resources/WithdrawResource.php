@@ -84,9 +84,15 @@ class WithdrawResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->slideOver()
-                    ->modalWidth('md'),
+                Tables\Actions\DeleteAction::make()
+                    ->hidden(fn (Transaction $record) => $record->confirmed)
+                    ->action(function (Transaction $record) {
+                        $user = value(fn (): User => Filament::auth()->user());
+                        $user->decrement('pending_withdraw', $record->amountFloat);
+                        $record->delete();
+
+                        return $record;
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

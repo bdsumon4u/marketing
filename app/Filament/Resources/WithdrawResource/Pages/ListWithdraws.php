@@ -6,7 +6,9 @@ use App\Filament\Resources\WithdrawResource;
 use App\Models\User;
 use Filament\Actions;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Number;
 
 class ListWithdraws extends ListRecords
 {
@@ -25,8 +27,14 @@ class ListWithdraws extends ListRecords
                     $user = value(fn (): User => Filament::auth()->user());
                     $wallet = $user->getOrCreateWallet('earning');
 
-                    if ($wallet->balanceFloat < $data['amount']) {
-                        $action->failureNotificationTitle('Insufficient balance')->failure();
+                    if ($wallet->balanceFloat - $user->pending_withdraw < $data['amount']) {
+                        $action->failureNotification(
+                            Notification::make()
+                                ->title('Insufficient balance')
+                                ->body('You have ' . Number::currency($wallet->balanceFloat) . ' in your earning wallet but you have ' . Number::currency($user->pending_withdraw) . ' in pending withdrawals.')
+                                ->danger()
+                        )
+                            ->failure();
 
                         return $action->halt();
                     }
@@ -36,6 +44,8 @@ class ListWithdraws extends ListRecords
                         'message' => 'Withdraw request to ' . $data['bkash_number'],
                         'bkash_number' => $data['bkash_number'],
                     ], false);
+
+                    $user->increment('pending_withdraw', $data['amount'] * 100);
 
                     $action->successNotificationTitle('Withdraw request sent')->success();
 
