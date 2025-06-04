@@ -66,10 +66,12 @@
 
     <style>
     .binary-tree {
-        padding: 20px;
+        padding: 20px 40px;
         overflow-x: auto;
         position: relative;
         min-height: 600px;
+        box-sizing: border-box;
+        min-width: 0;
     }
     .tree-svg {
         position: absolute;
@@ -86,6 +88,7 @@
         align-items: center;
         position: relative;
         z-index: 1;
+        min-width: max-content;
     }
     .tree-level {
         display: flex;
