@@ -23,11 +23,9 @@ class BinaryTreePage extends Page
 
     public $baseId = 1001;
 
-    public $maxLevel = 0;
-
     public function mount()
     {
-        $this->calculateMaxLevel();
+        // No maxLevel calculation needed
     }
 
     public function loadMoreLevels()
@@ -44,22 +42,20 @@ class BinaryTreePage extends Page
 
             for ($i = 0; $i < $count; $i++) {
                 $nodeId = $this->baseId + $startIndex + $i - 1;
-                if ($nodeId <= 11000) {
-                    $user = User::find($nodeId);
-                    if ($user) {
-                        if ($nodeId == $this->baseId) {
-                            $parentId = null;
-                        } else {
-                            $parentId = floor(($nodeId - $this->baseId + 1) / 2) + $this->baseId - 1;
-                        }
-                        $nodes[] = [
-                            'id' => $nodeId,
-                            'parent_id' => $parentId,
-                            'name' => $user->name,
-                            'username' => $user->username,
-                            'hasChildren' => $this->hasChildren($nodeId),
-                        ];
+                $user = User::find($nodeId);
+                if ($user) {
+                    if ($nodeId == $this->baseId) {
+                        $parentId = null;
+                    } else {
+                        $parentId = floor(($nodeId - $this->baseId + 1) / 2) + $this->baseId - 1;
                     }
+                    $nodes[] = [
+                        'id' => $nodeId,
+                        'parent_id' => $parentId,
+                        'name' => $user->name,
+                        'username' => $user->username,
+                        'hasChildren' => $this->hasChildren($nodeId),
+                    ];
                 }
             }
             $this->nodesPerLevel[$level] = $nodes;
@@ -72,25 +68,14 @@ class BinaryTreePage extends Page
     {
         $leftChild = 2 * ($nodeId - $this->baseId + 1) + $this->baseId - 1;
 
-        return $leftChild <= 11000;
-    }
-
-    private function calculateMaxLevel()
-    {
-        $level = 1;
-        $nodes = 1;
-        while ($nodes < 10000) {
-            $level++;
-            $nodes += pow(2, $level - 1);
-        }
-        $this->maxLevel = $level;
+        // No upper limit, just check if a user exists for the left child
+        return User::where('id', $leftChild)->exists();
     }
 
     protected function getViewData(): array
     {
         return [
             'visibleLevels' => $this->visibleLevels,
-            'maxLevel' => $this->maxLevel,
         ];
     }
 

@@ -52,7 +52,10 @@
                 </div>
             @endfor
         </div>
-        @if ($visibleLevels < $maxLevel)
+        @php
+            $nextLevelNodes = $this->getNodesForLevel($visibleLevels + 1);
+        @endphp
+        @if (count($nextLevelNodes) > 0)
             <div class="load-more">
                 <x-filament::button
                     wire:click="loadMoreLevels"
