@@ -143,48 +143,57 @@
     }
     </style>
     <script>
+    function drawTreeLines() {
+        const container = document.querySelector('.tree-container');
+        const svg = document.querySelector('.tree-svg');
+        if (!container || !svg) return;
+        svg.innerHTML = '';
+        // Get all user cards and their positions
+        const nodeMap = {};
+        container.querySelectorAll('.user-card').forEach(card => {
+            const id = card.getAttribute('data-node-id');
+            const parentId = card.getAttribute('data-parent-id');
+            const rect = card.getBoundingClientRect();
+            nodeMap[id] = {
+                card,
+                parentId,
+                rect
+            };
+        });
+        // Draw lines from parent to child
+        Object.values(nodeMap).forEach(node => {
+            if (node.parentId && nodeMap[node.parentId]) {
+                const parentRect = nodeMap[node.parentId].card.getBoundingClientRect();
+                const childRect = node.card.getBoundingClientRect();
+                // Calculate start and end points relative to SVG
+                const svgRect = svg.getBoundingClientRect();
+                const startX = parentRect.left + parentRect.width / 2 - svgRect.left;
+                const startY = parentRect.bottom - svgRect.top;
+                const endX = childRect.left + childRect.width / 2 - svgRect.left;
+                const endY = childRect.top - svgRect.top;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', startX);
+                line.setAttribute('y1', startY);
+                line.setAttribute('x2', endX);
+                line.setAttribute('y2', endY);
+                line.setAttribute('stroke', '#e5e7eb');
+                line.setAttribute('stroke-width', '2');
+                svg.appendChild(line);
+            }
+        });
+    }
+
     document.addEventListener('alpine:init', () => {
         Alpine.nextTick(() => {
-            setTimeout(() => {
-                const container = document.querySelector('.tree-container');
-                const svg = document.querySelector('.tree-svg');
-                if (!container || !svg) return;
-                svg.innerHTML = '';
-                // Get all user cards and their positions
-                const nodeMap = {};
-                container.querySelectorAll('.user-card').forEach(card => {
-                    const id = card.getAttribute('data-node-id');
-                    const parentId = card.getAttribute('data-parent-id');
-                    const rect = card.getBoundingClientRect();
-                    nodeMap[id] = {
-                        card,
-                        parentId,
-                        rect
-                    };
-                });
-                // Draw lines from parent to child
-                Object.values(nodeMap).forEach(node => {
-                    if (node.parentId && nodeMap[node.parentId]) {
-                        const parentRect = nodeMap[node.parentId].card.getBoundingClientRect();
-                        const childRect = node.card.getBoundingClientRect();
-                        // Calculate start and end points relative to SVG
-                        const svgRect = svg.getBoundingClientRect();
-                        const startX = parentRect.left + parentRect.width / 2 - svgRect.left;
-                        const startY = parentRect.bottom - svgRect.top;
-                        const endX = childRect.left + childRect.width / 2 - svgRect.left;
-                        const endY = childRect.top - svgRect.top;
-                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                        line.setAttribute('x1', startX);
-                        line.setAttribute('y1', startY);
-                        line.setAttribute('x2', endX);
-                        line.setAttribute('y2', endY);
-                        line.setAttribute('stroke', '#e5e7eb');
-                        line.setAttribute('stroke-width', '2');
-                        svg.appendChild(line);
-                    }
-                });
-            }, 200);
+            setTimeout(drawTreeLines, 200);
         });
+    });
+
+    document.addEventListener('livewire:navigated', () => {
+        setTimeout(drawTreeLines, 200);
+    });
+    document.addEventListener('livewire:update', () => {
+        setTimeout(drawTreeLines, 200);
     });
     </script>
 </x-filament-panels::page>
