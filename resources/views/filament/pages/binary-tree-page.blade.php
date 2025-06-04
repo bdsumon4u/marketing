@@ -1,9 +1,16 @@
 <x-filament-panels::page>
-    <div class="binary-tree" x-data="{
-        hovered: null,
-        setHovered(id) { this.hovered = id },
-        clearHovered() { this.hovered = null },
-    }">
+    <div class="binary-tree"
+        x-data="{
+            hovered: null,
+            visibleLevels: $wire.entangle('visibleLevels'),
+            setHovered(id) { this.hovered = id },
+            clearHovered() { this.hovered = null },
+        }"
+        x-init="
+            $nextTick(() => setTimeout(drawTreeLines, 200));
+            $watch('visibleLevels', () => setTimeout(drawTreeLines, 200));
+        "
+    >
         <div class="tree-container">
             @php
                 $allNodes = collect();
@@ -182,18 +189,5 @@
             }
         });
     }
-
-    document.addEventListener('alpine:init', () => {
-        Alpine.nextTick(() => {
-            setTimeout(drawTreeLines, 200);
-        });
-    });
-
-    document.addEventListener('livewire:navigated', () => {
-        setTimeout(drawTreeLines, 200);
-    });
-    document.addEventListener('livewire:update', () => {
-        setTimeout(drawTreeLines, 200);
-    });
     </script>
 </x-filament-panels::page>
