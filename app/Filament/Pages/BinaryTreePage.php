@@ -47,8 +47,10 @@ class BinaryTreePage extends Page
                 if ($nodeId <= 11000) {
                     $user = User::find($nodeId);
                     if ($user) {
+                        $parentId = $level == 1 ? null : $this->baseId + floor(($startIndex + $i - 1) / 2) - 1;
                         $nodes[] = [
                             'id' => $nodeId,
+                            'parent_id' => $parentId,
                             'name' => $user->name,
                             'username' => $user->username,
                             'hasChildren' => $this->hasChildren($nodeId),
