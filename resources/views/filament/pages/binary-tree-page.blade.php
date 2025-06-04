@@ -24,8 +24,8 @@
                     @foreach ($this->getNodesForLevel($level) as $node)
                         <div class="tree-node"
                             x-data="{ id: {{ $node['id'] }}, parentId: {{ $node['parent_id'] ?? 'null' }} }"
-                            @mouseenter="setHovered(id)"
-                            @mouseleave="clearHovered()"
+                            @mouseenter="setHovered(id); highlightLines(id, parentId, true);"
+                            @mouseleave="clearHovered(); highlightLines(id, parentId, false);"
                         >
                             <div class="user-card"
                                 :class="{
@@ -81,6 +81,10 @@
         height: 100%;
         z-index: 0;
         pointer-events: none;
+    }
+    .svg-line-highlight {
+        stroke: #2563eb !important;
+        stroke-width: 2 !important;
     }
     .tree-container {
         display: flex;
@@ -188,9 +192,35 @@
                 line.setAttribute('y2', endY);
                 line.setAttribute('stroke', '#e5e7eb');
                 line.setAttribute('stroke-width', '2');
+                line.setAttribute('data-parent-id', node.parentId);
+                line.setAttribute('data-child-id', node.card.getAttribute('data-node-id'));
+                line.classList.add('svg-connection-line');
                 svg.appendChild(line);
             }
         });
+    }
+    function highlightLines(id, parentId, highlight) {
+        // Highlight lines where this node is parent or child
+        const svg = document.querySelector('.tree-svg');
+        if (!svg) return;
+        // Highlight lines to children
+        svg.querySelectorAll(`.svg-connection-line[data-parent-id='${id}']`).forEach(line => {
+            if (highlight) {
+                line.classList.add('svg-line-highlight');
+            } else {
+                line.classList.remove('svg-line-highlight');
+            }
+        });
+        // Highlight line to parent
+        if (parentId && parentId !== 'null') {
+            svg.querySelectorAll(`.svg-connection-line[data-child-id='${id}']`).forEach(line => {
+                if (highlight) {
+                    line.classList.add('svg-line-highlight');
+                } else {
+                    line.classList.remove('svg-line-highlight');
+                }
+            });
+        }
     }
     </script>
 </x-filament-panels::page>
