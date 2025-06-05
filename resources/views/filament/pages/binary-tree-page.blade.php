@@ -116,72 +116,88 @@
 </x-filament-panels::page>
 
 <script>
-function getVisibleConnectionsFromDOM() {
-    const script = document.getElementById('visible-connections-json');
-    if (script) {
-        try {
-            return JSON.parse(script.textContent);
-        } catch (e) {}
-    }
-    return [];
-}
-window.visibleConnections = getVisibleConnectionsFromDOM();
-
-function drawTreeLines() {
-    const container = document.querySelector('.tree-container');
-    const svg = container ? container.querySelector('.tree-svg') : null;
-    if (!svg || !window.visibleConnections) return;
-    svg.setAttribute('width', container.scrollWidth);
-    svg.setAttribute('height', container.scrollHeight);
-    svg.innerHTML = '';
-    window.visibleConnections.forEach(([parentId, childId]) => {
-        const parentCard = container.querySelector(`.user-card[data-node-id='${parentId}']`);
-        const childCard = container.querySelector(`.user-card[data-node-id='${childId}']`);
-        if (!parentCard || !childCard) return;
-        const parentRect = parentCard.getBoundingClientRect();
-        const childRect = childCard.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        const startX = parentRect.left + parentRect.width / 2 - containerRect.left + container.scrollLeft;
-        const startY = parentRect.bottom - containerRect.top + container.scrollTop;
-        const endX = childRect.left + childRect.width / 2 - containerRect.left + container.scrollLeft;
-        const endY = childRect.top - containerRect.top + container.scrollTop;
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', startX);
-        line.setAttribute('y1', startY);
-        line.setAttribute('x2', endX);
-        line.setAttribute('y2', endY);
-        line.setAttribute('stroke', '#e5e7eb');
-        line.setAttribute('stroke-width', '2');
-        line.setAttribute('data-parent-id', parentId);
-        line.setAttribute('data-child-id', childId);
-        line.classList.add('svg-connection-line');
-        svg.appendChild(line);
-    });
-}
-
-window.highlightTreeNode = function(nodeId, highlight) {
-    const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
-    if (nodeCard) {
-        nodeCard.classList.toggle('highlight', highlight);
-    }
-    window.visibleConnections.forEach(([parentId, childId]) => {
-        if (parentId == nodeId) {
-            const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
-            if (childCard) {
-                childCard.classList.toggle('highlight-child', highlight);
-            }
-            const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
-            if (line) {
-                line.classList.toggle('svg-line-highlight', highlight);
-            }
+    function getVisibleConnectionsFromDOM() {
+        const script = document.getElementById('visible-connections-json');
+        if (script) {
+            try {
+                return JSON.parse(script.textContent);
+            } catch (e) {}
         }
-    });
-};
-
-setInterval(() => {
+        return [];
+    }
     window.visibleConnections = getVisibleConnectionsFromDOM();
-    drawTreeLines();
-}, 200);
 
-window.addEventListener('resize', () => drawTreeLines());
+    function drawTreeLines() {
+        const container = document.querySelector('.tree-container');
+        const svg = container ? container.querySelector('.tree-svg') : null;
+        if (!svg || !window.visibleConnections) {
+            console.log('no svg or visible connections');
+            return;
+        }
+        console.log(container.scrollWidth, container.scrollHeight);
+        svg.setAttribute('width', container.scrollWidth);
+        svg.setAttribute('height', container.scrollHeight);
+        svg.innerHTML = '';
+        window.visibleConnections.forEach(([parentId, childId]) => {
+            const parentCard = container.querySelector(`.user-card[data-node-id='${parentId}']`);
+            const childCard = container.querySelector(`.user-card[data-node-id='${childId}']`);
+            if (!parentCard || !childCard) {
+                console.log('no parent or child card');
+                return;
+            }
+            const parentRect = parentCard.getBoundingClientRect();
+            const childRect = childCard.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const startX = parentRect.left + parentRect.width / 2 - containerRect.left + container.scrollLeft;
+            const startY = parentRect.bottom - containerRect.top + container.scrollTop;
+            const endX = childRect.left + childRect.width / 2 - containerRect.left + container.scrollLeft;
+            const endY = childRect.top - containerRect.top + container.scrollTop;
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', startX);
+            line.setAttribute('y1', startY);
+            line.setAttribute('x2', endX);
+            line.setAttribute('y2', endY);
+            line.setAttribute('stroke', '#e5e7eb');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('data-parent-id', parentId);
+            line.setAttribute('data-child-id', childId);
+            line.classList.add('svg-connection-line');
+            svg.appendChild(line);
+        });
+        console.log('done drawing tree lines', svg);
+    }
+
+    window.highlightTreeNode = function(nodeId, highlight) {
+        const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
+        if (nodeCard) {
+            nodeCard.classList.toggle('highlight', highlight);
+        }
+        window.visibleConnections.forEach(([parentId, childId]) => {
+            if (parentId == nodeId) {
+                const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
+                if (childCard) {
+                    childCard.classList.toggle('highlight-child', highlight);
+                }
+                const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
+                if (line) {
+                    line.classList.toggle('svg-line-highlight', highlight);
+                }
+            }
+        });
+    };
+
+    // setInterval(() => {
+    //     window.visibleConnections = getVisibleConnectionsFromDOM();
+        drawTreeLines();
+    // }, 200);
+
+    window.addEventListener('update-tree', () => {
+        console.log('update-tree');
+        setTimeout(() => {
+            window.visibleConnections = getVisibleConnectionsFromDOM();
+            drawTreeLines();
+        }, 100);
+    });
+
+    window.addEventListener('resize', () => drawTreeLines());
 </script>

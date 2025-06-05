@@ -30,6 +30,8 @@ class BinaryTreePage extends Page
     {
         if (! in_array($nodeId, $this->expandedNodes)) {
             $this->expandedNodes[] = $nodeId;
+
+            $this->dispatch('update-tree');
         }
     }
 
