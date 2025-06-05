@@ -169,19 +169,21 @@
 
     window.highlightTreeNode = function(nodeId, highlight) {
         const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
-        if (nodeCard) {
-            nodeCard.classList.toggle('highlight', highlight);
-        }
+        if (!nodeCard) return;
+
+        nodeCard.classList.toggle('highlight', highlight);
+
         window.visibleConnections.forEach(([parentId, childId]) => {
-            if (parentId == nodeId) {
-                const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
-                if (childCard) {
-                    childCard.classList.toggle('highlight-child', highlight);
-                }
-                const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
-                if (line) {
-                    line.classList.toggle('svg-line-highlight', highlight);
-                }
+            if (parentId !== nodeId) return;
+
+            const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
+            if (childCard) {
+                childCard.classList.toggle('highlight-child', highlight);
+            }
+
+            const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
+            if (line) {
+                line.classList.toggle('svg-line-highlight', highlight);
             }
         });
     };

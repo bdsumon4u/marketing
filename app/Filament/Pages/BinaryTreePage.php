@@ -37,16 +37,16 @@ class BinaryTreePage extends Page
 
     public function getNode($nodeId)
     {
-        $user = User::find($nodeId);
-        if (! $user) {
+        if (! $user = User::find($nodeId)) {
             return null;
         }
 
-        $leftChild = 2 * ($nodeId - $this->baseId + 1) + $this->baseId - 1;
+        $leftChild = 2 * $nodeId - $this->baseId + 1;
         $rightChild = $leftChild + 1;
 
         return [
             'id' => $nodeId,
+            'parent_id' => (($nodeId - $this->baseId + 1) >> 1) + $this->baseId - 1,
             'name' => $user->name,
             'username' => $user->username,
             'children' => [

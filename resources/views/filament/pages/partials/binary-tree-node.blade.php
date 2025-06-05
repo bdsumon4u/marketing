@@ -5,6 +5,7 @@
     <div class="tree-node">
         <div class="user-card"
             data-node-id="{{ $node['id'] }}"
+            data-parent-id="{{ $node['parent_id'] }}"
             @mouseenter="window.highlightTreeNode({{ $node['id'] }}, true)"
             @mouseleave="window.highlightTreeNode({{ $node['id'] }}, false)"
         >
