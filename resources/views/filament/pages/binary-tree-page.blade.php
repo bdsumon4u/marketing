@@ -16,16 +16,14 @@
         }
         $connections = collectVisibleConnections($baseId, $expandedNodes);
     @endphp
-    <div class="binary-tree" x-data="{hovered: null}" x-init="
-        $nextTick(() => setTimeout(drawTreeLines, 200));
-    ">
-        <svg class="tree-svg" width="100%" height="100%" style="position:absolute; left:0; top:0; pointer-events:none; z-index:0;"></svg>
-        <div class="tree-container">
+    <div class="binary-tree" x-data="{hovered: null}">
+        <div class="tree-container" style="position:relative;">
+            <svg class="tree-svg" style="position:absolute; left:0; top:0; pointer-events:none; z-index:0;"></svg>
             @include('filament.pages.partials.binary-tree-node', ['nodeId' => $baseId, 'expandedNodes' => $expandedNodes])
+            <script type="application/json" id="visible-connections-json">
+                {!! json_encode($connections) !!}
+            </script>
         </div>
-        <script type="application/json" id="visible-connections-json">
-            {!! json_encode($connections) !!}
-        </script>
     </div>
 
     <style>
@@ -38,11 +36,6 @@
         min-width: 0;
     }
     .tree-svg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
         z-index: 0;
         pointer-events: none;
     }
@@ -135,20 +128,24 @@ function getVisibleConnectionsFromDOM() {
 window.visibleConnections = getVisibleConnectionsFromDOM();
 
 function drawTreeLines() {
-    const svg = document.querySelector('.tree-svg');
+    const container = document.querySelector('.tree-container');
+    const svg = container.querySelector('.tree-svg');
     if (!svg || !window.visibleConnections) return;
+    // Set SVG size to match container
+    svg.setAttribute('width', container.scrollWidth);
+    svg.setAttribute('height', container.scrollHeight);
     svg.innerHTML = '';
     window.visibleConnections.forEach(([parentId, childId]) => {
-        const parentCard = document.querySelector(`.user-card[data-node-id='${parentId}']`);
-        const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
+        const parentCard = container.querySelector(`.user-card[data-node-id='${parentId}']`);
+        const childCard = container.querySelector(`.user-card[data-node-id='${childId}']`);
         if (!parentCard || !childCard) return;
         const parentRect = parentCard.getBoundingClientRect();
         const childRect = childCard.getBoundingClientRect();
-        const svgRect = svg.getBoundingClientRect();
-        const startX = parentRect.left + parentRect.width / 2 - svgRect.left;
-        const startY = parentRect.bottom - svgRect.top;
-        const endX = childRect.left + childRect.width / 2 - svgRect.left;
-        const endY = childRect.top - svgRect.top;
+        const containerRect = container.getBoundingClientRect();
+        const startX = parentRect.left + parentRect.width / 2 - containerRect.left + container.scrollLeft;
+        const startY = parentRect.bottom - containerRect.top + container.scrollTop;
+        const endX = childRect.left + childRect.width / 2 - containerRect.left + container.scrollLeft;
+        const endY = childRect.top - containerRect.top + container.scrollTop;
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', startX);
         line.setAttribute('y1', startY);
@@ -163,14 +160,11 @@ function drawTreeLines() {
     });
 }
 
-// Highlight function for node and its children and lines
 window.highlightTreeNode = function(nodeId, highlight) {
-    // Highlight the node itself
     const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
     if (nodeCard) {
         nodeCard.classList.toggle('highlight', highlight);
     }
-    // Highlight direct children and lines
     window.visibleConnections.forEach(([parentId, childId]) => {
         if (parentId == nodeId) {
             const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
