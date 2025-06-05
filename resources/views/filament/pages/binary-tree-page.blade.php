@@ -18,71 +18,13 @@
     @endphp
     <div class="binary-tree" x-data="{hovered: null}" x-init="
         $nextTick(() => setTimeout(drawTreeLines, 200));
-        window.addEventListener('livewire:update', () => setTimeout(drawTreeLines, 200));
     ">
         <svg class="tree-svg" width="100%" height="100%" style="position:absolute; left:0; top:0; pointer-events:none; z-index:0;"></svg>
         <div class="tree-container">
             @include('filament.pages.partials.binary-tree-node', ['nodeId' => $baseId, 'expandedNodes' => $expandedNodes])
         </div>
-        <script>
-        window.visibleConnections = @json($connections);
-
-        function drawTreeLines() {
-            const svg = document.querySelector('.tree-svg');
-            if (!svg || !window.visibleConnections) return;
-            svg.innerHTML = '';
-            window.visibleConnections.forEach(([parentId, childId]) => {
-                const parentCard = document.querySelector(`.user-card[data-node-id='${parentId}']`);
-                const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
-                if (!parentCard || !childCard) return;
-                const parentRect = parentCard.getBoundingClientRect();
-                const childRect = childCard.getBoundingClientRect();
-                const svgRect = svg.getBoundingClientRect();
-                const startX = parentRect.left + parentRect.width / 2 - svgRect.left;
-                const startY = parentRect.bottom - svgRect.top;
-                const endX = childRect.left + childRect.width / 2 - svgRect.left;
-                const endY = childRect.top - svgRect.top;
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', startX);
-                line.setAttribute('y1', startY);
-                line.setAttribute('x2', endX);
-                line.setAttribute('y2', endY);
-                line.setAttribute('stroke', '#e5e7eb');
-                line.setAttribute('stroke-width', '2');
-                line.setAttribute('data-parent-id', parentId);
-                line.setAttribute('data-child-id', childId);
-                line.classList.add('svg-connection-line');
-                svg.appendChild(line);
-            });
-        }
-
-        // Highlight function for node and its children and lines
-        window.highlightTreeNode = function(nodeId, highlight) {
-            // Highlight the node itself
-            const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
-            if (nodeCard) {
-                nodeCard.classList.toggle('highlight', highlight);
-            }
-            // Highlight direct children and lines
-            window.visibleConnections.forEach(([parentId, childId]) => {
-                if (parentId == nodeId) {
-                    const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
-                    if (childCard) {
-                        childCard.classList.toggle('highlight-child', highlight);
-                    }
-                    const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
-                    if (line) {
-                        line.classList.toggle('svg-line-highlight', highlight);
-                    }
-                }
-            });
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(drawTreeLines, 200);
-        });
-        window.addEventListener('resize', () => setTimeout(drawTreeLines, 200));
-        window.addEventListener('livewire:update', () => setTimeout(drawTreeLines, 200));
+        <script type="application/json" id="visible-connections-json">
+            {!! json_encode($connections) !!}
         </script>
     </div>
 
@@ -179,3 +121,85 @@
     }
     </style>
 </x-filament-panels::page>
+
+<script>
+function getVisibleConnectionsFromDOM() {
+    const script = document.getElementById('visible-connections-json');
+    if (script) {
+        try {
+            return JSON.parse(script.textContent);
+        } catch (e) {}
+    }
+    return [];
+}
+window.visibleConnections = getVisibleConnectionsFromDOM();
+
+function drawTreeLines() {
+    const svg = document.querySelector('.tree-svg');
+    if (!svg || !window.visibleConnections) return;
+    svg.innerHTML = '';
+    window.visibleConnections.forEach(([parentId, childId]) => {
+        const parentCard = document.querySelector(`.user-card[data-node-id='${parentId}']`);
+        const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
+        if (!parentCard || !childCard) return;
+        const parentRect = parentCard.getBoundingClientRect();
+        const childRect = childCard.getBoundingClientRect();
+        const svgRect = svg.getBoundingClientRect();
+        const startX = parentRect.left + parentRect.width / 2 - svgRect.left;
+        const startY = parentRect.bottom - svgRect.top;
+        const endX = childRect.left + childRect.width / 2 - svgRect.left;
+        const endY = childRect.top - svgRect.top;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', startX);
+        line.setAttribute('y1', startY);
+        line.setAttribute('x2', endX);
+        line.setAttribute('y2', endY);
+        line.setAttribute('stroke', '#e5e7eb');
+        line.setAttribute('stroke-width', '2');
+        line.setAttribute('data-parent-id', parentId);
+        line.setAttribute('data-child-id', childId);
+        line.classList.add('svg-connection-line');
+        svg.appendChild(line);
+    });
+}
+
+// Highlight function for node and its children and lines
+window.highlightTreeNode = function(nodeId, highlight) {
+    // Highlight the node itself
+    const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
+    if (nodeCard) {
+        nodeCard.classList.toggle('highlight', highlight);
+    }
+    // Highlight direct children and lines
+    window.visibleConnections.forEach(([parentId, childId]) => {
+        if (parentId == nodeId) {
+            const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
+            if (childCard) {
+                childCard.classList.toggle('highlight-child', highlight);
+            }
+            const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
+            if (line) {
+                line.classList.toggle('svg-line-highlight', highlight);
+            }
+        }
+    });
+};
+
+function updateAndDrawLines() {
+    window.visibleConnections = getVisibleConnectionsFromDOM();
+    setTimeout(drawTreeLines, 50);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(drawTreeLines, 200);
+});
+window.addEventListener('resize', () => setTimeout(drawTreeLines, 200));
+
+if (window.Livewire && window.Livewire.hook) {
+    window.Livewire.hook('message.processed', () => {
+        updateAndDrawLines();
+    });
+} else {
+    document.addEventListener('livewire:element.updated', updateAndDrawLines);
+}
+</script>
