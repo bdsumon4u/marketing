@@ -129,9 +129,8 @@ window.visibleConnections = getVisibleConnectionsFromDOM();
 
 function drawTreeLines() {
     const container = document.querySelector('.tree-container');
-    const svg = container.querySelector('.tree-svg');
+    const svg = container ? container.querySelector('.tree-svg') : null;
     if (!svg || !window.visibleConnections) return;
-    // Set SVG size to match container
     svg.setAttribute('width', container.scrollWidth);
     svg.setAttribute('height', container.scrollHeight);
     svg.innerHTML = '';
@@ -179,21 +178,38 @@ window.highlightTreeNode = function(nodeId, highlight) {
     });
 };
 
-function updateAndDrawLines() {
+function updateAndDrawLinesWithObserver() {
     window.visibleConnections = getVisibleConnectionsFromDOM();
-    setTimeout(drawTreeLines, 50);
+    drawTreeLines();
+
+    // Attach MutationObserver to .tree-container
+    const container = document.querySelector('.tree-container');
+    if (container) {
+        if (window._treeObserver) {
+            window._treeObserver.disconnect();
+        }
+        let throttleTimer = null;
+        window._treeObserver = new MutationObserver(() => {
+            if (throttleTimer) clearTimeout(throttleTimer);
+            throttleTimer = setTimeout(() => {
+                drawTreeLines();
+                throttleTimer = null;
+            }, 100); // 100ms delay to batch DOM changes
+        });
+        window._treeObserver.observe(container, { childList: true, subtree: true });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(drawTreeLines, 200);
+    updateAndDrawLinesWithObserver();
 });
-window.addEventListener('resize', () => setTimeout(drawTreeLines, 200));
+window.addEventListener('resize', () => drawTreeLines());
 
 if (window.Livewire && window.Livewire.hook) {
     window.Livewire.hook('message.processed', () => {
-        updateAndDrawLines();
+        updateAndDrawLinesWithObserver();
     });
 } else {
-    document.addEventListener('livewire:element.updated', updateAndDrawLines);
+    document.addEventListener('livewire:element.updated', updateAndDrawLinesWithObserver);
 }
 </script>
