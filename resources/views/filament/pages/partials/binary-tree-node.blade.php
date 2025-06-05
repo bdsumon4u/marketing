@@ -3,7 +3,11 @@
 @endphp
 @if($node)
     <div class="tree-node">
-        <div class="user-card">
+        <div class="user-card"
+            data-node-id="{{ $node['id'] }}"
+            @mouseenter="window.highlightTreeNode({{ $node['id'] }}, true)"
+            @mouseleave="window.highlightTreeNode({{ $node['id'] }}, false)"
+        >
             <div class="avatar">
                 <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="8" r="4" />
