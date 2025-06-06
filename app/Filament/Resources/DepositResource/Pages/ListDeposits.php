@@ -13,7 +13,11 @@ class ListDeposits extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\Action::make('addFund')
+                ->label('Add Funds')
+                ->icon('heroicon-o-plus')
+                ->action(fn () => $this->dispatch('open-modal', id: 'add-fund-modal')),
+
         ];
     }
 }

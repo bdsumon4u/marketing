@@ -93,7 +93,6 @@ class AppPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn () => Filament::auth()->check() ? Blade::render('
                     <livewire:add-fund-modal />
-                    <livewire:withdraw-modal />
                     <livewire:verify-now-modal />
                 ') : null,
             );

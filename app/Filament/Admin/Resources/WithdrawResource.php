@@ -97,8 +97,8 @@ class WithdrawResource extends Resource
                             ->color('danger')
                             ->action(function (Transaction $record, array $data) {
                                 $user = value(fn (): User => $record->payable);
-                                $user->decrement('pending_withdraw', $record->amount);
-                                $user->increment('rejected_withdraw', $record->amount);
+                                $user->decrement('pending_withdraw', abs($record->amount));
+                                $user->increment('rejected_withdraw', abs($record->amount));
 
                                 Notification::make()
                                     ->title('Withdraw rejected')
@@ -129,8 +129,8 @@ class WithdrawResource extends Resource
                         $meta['transaction_id'] = $data['transaction_id'];
                         $record->meta = $meta;
                         $record->save();
-                        $user->decrement('pending_withdraw', $record->amount);
-                        $user->increment('total_withdraw', $record->amount);
+                        $user->decrement('pending_withdraw', abs($record->amount));
+                        $user->increment('total_withdraw', abs($record->amount));
 
                         Notification::make()
                             ->title('Withdraw confirmed')
@@ -152,7 +152,7 @@ class WithdrawResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

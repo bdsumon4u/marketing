@@ -69,11 +69,11 @@ class DepositResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -89,8 +89,8 @@ class DepositResource extends Resource
     {
         return [
             'index' => Pages\ListDeposits::route('/'),
-            'create' => Pages\CreateDeposit::route('/create'),
-            'edit' => Pages\EditDeposit::route('/{record}/edit'),
+            // 'create' => Pages\CreateDeposit::route('/create'),
+            // 'edit' => Pages\EditDeposit::route('/{record}/edit'),
         ];
     }
 }

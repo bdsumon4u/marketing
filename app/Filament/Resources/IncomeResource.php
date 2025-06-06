@@ -69,11 +69,11 @@ class IncomeResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -89,8 +89,8 @@ class IncomeResource extends Resource
     {
         return [
             'index' => Pages\ListIncomes::route('/'),
-            'create' => Pages\CreateIncome::route('/create'),
-            'edit' => Pages\EditIncome::route('/{record}/edit'),
+            // 'create' => Pages\CreateIncome::route('/create'),
+            // 'edit' => Pages\EditIncome::route('/{record}/edit'),
         ];
     }
 }

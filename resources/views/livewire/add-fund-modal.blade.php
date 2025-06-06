@@ -1,6 +1,7 @@
 <x-filament::modal
     id="add-fund-modal"
     width="md"
+    display-classes="block"
 >
     <x-slot name="header">
         <h2 class="text-xl font-bold tracking-tight">Add Fund</h2>

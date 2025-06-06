@@ -4,7 +4,9 @@
         data-node-id="{{ $user->id }}"
         data-parent-id="{{ $user->parentId() }}"
         @mouseenter="highlightNode({{ $user->id }}, true)"
-        @mouseleave="highlightNode({{ $user->id }}, false)">
+        @mouseleave="highlightNode({{ $user->id }}, false)"
+        @unless($user->is_active) style="border-color: red;" @endunless
+    >
         <div class="avatar">
             <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="8" r="4" />
