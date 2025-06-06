@@ -1,28 +1,12 @@
 <x-filament-panels::page>
-    @php
-        // Helper to collect all visible parent-child pairs
-        function collectVisibleConnections($nodeId, $expandedNodes, &$connections = []) {
-            $node = app('livewire')->current()->getNode($nodeId);
-            if (!$node) return;
-            if (in_array($nodeId, $expandedNodes)) {
-                foreach ($node['children'] as $childId) {
-                    if ($childId) {
-                        $connections[] = [$nodeId, $childId];
-                        collectVisibleConnections($childId, $expandedNodes, $connections);
-                    }
-                }
-            }
-            return $connections;
-        }
-        $connections = collectVisibleConnections($baseId, $expandedNodes);
-    @endphp
-    <div class="binary-tree" x-data="{hovered: null}">
+    <div class="binary-tree"
+        x-data="binaryTree()"
+        {{-- I don't know why this works --}}
+        x-effect="connections && $nextTick(() => draw())"
+    >
         <div class="tree-container" style="position:relative;">
             <svg class="tree-svg" style="position:absolute; left:0; top:0; pointer-events:none; z-index:0;"></svg>
             @include('filament.pages.partials.binary-tree-node', ['nodeId' => $baseId, 'expandedNodes' => $expandedNodes])
-            <script type="application/json" id="visible-connections-json">
-                {!! json_encode($connections) !!}
-            </script>
         </div>
     </div>
 
@@ -113,93 +97,64 @@
         margin-top: 20px;
     }
     </style>
-</x-filament-panels::page>
 
 <script>
-    function getVisibleConnectionsFromDOM() {
-        const script = document.getElementById('visible-connections-json');
-        if (script) {
-            try {
-                return JSON.parse(script.textContent);
-            } catch (e) {}
+function binaryTree() {
+    return {
+        connections: @entangle('connections').live,
+        draw() {
+            const container = document.querySelector('.tree-container');
+            const svg = container ? container.querySelector('.tree-svg') : null;
+            if (!svg) return;
+
+            svg.setAttribute('width', container.scrollWidth);
+            svg.setAttribute('height', container.scrollHeight);
+            svg.innerHTML = '';
+
+            this.connections.forEach(([parentId, childId]) => {
+                const parentCard = container.querySelector(`.user-card[data-node-id='${parentId}']`);
+                const childCard = container.querySelector(`.user-card[data-node-id='${childId}']`);
+                if (!parentCard || !childCard) return;
+                const parentRect = parentCard.getBoundingClientRect();
+                const childRect = childCard.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                const startX = parentRect.left + parentRect.width / 2 - containerRect.left + container.scrollLeft;
+                const startY = parentRect.bottom - containerRect.top + container.scrollTop;
+                const endX = childRect.left + childRect.width / 2 - containerRect.left + container.scrollLeft;
+                const endY = childRect.top - containerRect.top + container.scrollTop;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', startX);
+                line.setAttribute('y1', startY);
+                line.setAttribute('x2', endX);
+                line.setAttribute('y2', endY);
+                line.setAttribute('stroke', '#e5e7eb');
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('data-parent-id', parentId);
+                line.setAttribute('data-child-id', childId);
+                line.classList.add('svg-connection-line');
+                svg.appendChild(line);
+            });
+        },
+        highlightNode(nodeId, highlight) {
+            const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
+            if (!nodeCard) return;
+            nodeCard.classList.toggle('highlight', highlight);
+
+            this.connections.forEach(([parentId, childId]) => {
+                if (parentId == nodeId) {
+                    const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
+                    if (childCard) {
+                        childCard.classList.toggle('highlight-child', highlight);
+                    }
+                    const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
+                    if (line) {
+                        line.classList.toggle('svg-line-highlight', highlight);
+                    }
+                }
+            });
         }
-        return [];
     }
-    window.visibleConnections = getVisibleConnectionsFromDOM();
-
-    function drawTreeLines() {
-        const container = document.querySelector('.tree-container');
-        const svg = container ? container.querySelector('.tree-svg') : null;
-        if (!svg || !window.visibleConnections) {
-            console.log('no svg or visible connections');
-            return;
-        }
-        console.log(container.scrollWidth, container.scrollHeight);
-        svg.setAttribute('width', container.scrollWidth);
-        svg.setAttribute('height', container.scrollHeight);
-        svg.innerHTML = '';
-        window.visibleConnections.forEach(([parentId, childId]) => {
-            const parentCard = container.querySelector(`.user-card[data-node-id='${parentId}']`);
-            const childCard = container.querySelector(`.user-card[data-node-id='${childId}']`);
-            if (!parentCard || !childCard) {
-                console.log('no parent or child card');
-                return;
-            }
-            const parentRect = parentCard.getBoundingClientRect();
-            const childRect = childCard.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
-            const startX = parentRect.left + parentRect.width / 2 - containerRect.left + container.scrollLeft;
-            const startY = parentRect.bottom - containerRect.top + container.scrollTop;
-            const endX = childRect.left + childRect.width / 2 - containerRect.left + container.scrollLeft;
-            const endY = childRect.top - containerRect.top + container.scrollTop;
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', startX);
-            line.setAttribute('y1', startY);
-            line.setAttribute('x2', endX);
-            line.setAttribute('y2', endY);
-            line.setAttribute('stroke', '#e5e7eb');
-            line.setAttribute('stroke-width', '2');
-            line.setAttribute('data-parent-id', parentId);
-            line.setAttribute('data-child-id', childId);
-            line.classList.add('svg-connection-line');
-            svg.appendChild(line);
-        });
-        console.log('done drawing tree lines', svg);
-    }
-
-    window.highlightTreeNode = function(nodeId, highlight) {
-        const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
-        if (!nodeCard) return;
-
-        nodeCard.classList.toggle('highlight', highlight);
-
-        window.visibleConnections.forEach(([parentId, childId]) => {
-            if (parentId !== nodeId) return;
-
-            const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
-            if (childCard) {
-                childCard.classList.toggle('highlight-child', highlight);
-            }
-
-            const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
-            if (line) {
-                line.classList.toggle('svg-line-highlight', highlight);
-            }
-        });
-    };
-
-    // setInterval(() => {
-    //     window.visibleConnections = getVisibleConnectionsFromDOM();
-        drawTreeLines();
-    // }, 200);
-
-    window.addEventListener('update-tree', () => {
-        console.log('update-tree');
-        setTimeout(() => {
-            window.visibleConnections = getVisibleConnectionsFromDOM();
-            drawTreeLines();
-        }, 100);
-    });
-
-    window.addEventListener('resize', () => drawTreeLines());
+}
 </script>
+
+</x-filament-panels::page>

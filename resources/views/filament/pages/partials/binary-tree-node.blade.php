@@ -5,9 +5,8 @@
     <div class="tree-node">
         <div class="user-card"
             data-node-id="{{ $node['id'] }}"
-            data-parent-id="{{ $node['parent_id'] }}"
-            @mouseenter="window.highlightTreeNode({{ $node['id'] }}, true)"
-            @mouseleave="window.highlightTreeNode({{ $node['id'] }}, false)"
+            @mouseenter="highlightNode({{ $node['id'] }}, true)"
+            @mouseleave="highlightNode({{ $node['id'] }}, false)"
         >
             <div class="avatar">
                 <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
@@ -16,6 +15,7 @@
                 </svg>
             </div>
             <div class="user-info">
+                <div class="user-id">ID: {{ $node['id'] }}</div>
                 <div class="user-name">{{ $node['name'] }}</div>
                 <div class="user-username">{{ '@' . $node['username'] }}</div>
             </div>

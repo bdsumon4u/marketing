@@ -21,18 +21,40 @@ class BinaryTreePage extends Page
 
     public $expandedNodes = [];
 
+    public $connections = [];
+
     public function mount()
     {
         $this->expandedNodes = [$this->baseId]; // Start with root node expanded
+        $this->buildConnections();
     }
 
     public function expandNode($nodeId)
     {
         if (! in_array($nodeId, $this->expandedNodes)) {
             $this->expandedNodes[] = $nodeId;
-
-            $this->dispatch('update-tree');
+            $this->buildConnections();
         }
+    }
+
+    protected function buildConnections()
+    {
+        $this->connections = collect($this->expandedNodes)
+            ->map(function ($nodeId) {
+                $node = $this->getNode($nodeId);
+                if (! $node) {
+                    return null;
+                }
+
+                return collect($node['children'])
+                    ->filter()
+                    ->map(fn ($childId) => [$nodeId, $childId])
+                    ->values();
+            })
+            ->filter()
+            ->flatten(1)
+            ->values()
+            ->toArray();
     }
 
     public function getNode($nodeId)
@@ -46,12 +68,11 @@ class BinaryTreePage extends Page
 
         return [
             'id' => $nodeId,
-            'parent_id' => (($nodeId - $this->baseId + 1) >> 1) + $this->baseId - 1,
             'name' => $user->name,
             'username' => $user->username,
             'children' => [
-                User::find($leftChild) ? $leftChild : null,
-                User::find($rightChild) ? $rightChild : null,
+                $leftChild,
+                $rightChild,
             ],
         ];
     }
@@ -66,6 +87,7 @@ class BinaryTreePage extends Page
         return [
             'baseId' => $this->baseId,
             'expandedNodes' => $this->expandedNodes,
+            'connections' => $this->connections,
         ];
     }
 
