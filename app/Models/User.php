@@ -83,6 +83,30 @@ class User extends Authenticatable implements Confirmable, FilamentUser, MustVer
         ];
     }
 
+    public static function baseId(): int
+    {
+        return 1001;
+    }
+
+    public function parentId(): ?int
+    {
+        if ($this->id === static::baseId()) {
+            return null;
+        }
+
+        return ($this->id + static::baseId() - 1) >> 1;
+    }
+
+    public function leftId(): int
+    {
+        return 2 * $this->id - static::baseId() + 1;
+    }
+
+    public function rightId(): int
+    {
+        return 2 * $this->id - static::baseId() + 2;
+    }
+
     protected static function boot()
     {
         parent::boot();

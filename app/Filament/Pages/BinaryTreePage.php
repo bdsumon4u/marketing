@@ -17,15 +17,13 @@ class BinaryTreePage extends Page
 
     protected static ?int $navigationSort = 1;
 
-    public $baseId = 1001;
-
     public $expandedNodes = [];
 
     public $connections = [];
 
     public function mount()
     {
-        $this->expandedNodes = [$this->baseId]; // Start with root node expanded
+        $this->expandedNodes = [User::baseId()]; // Start with root node expanded
         $this->buildConnections();
     }
 
@@ -63,7 +61,7 @@ class BinaryTreePage extends Page
             return null;
         }
 
-        $leftChild = 2 * $nodeId - $this->baseId + 1;
+        $leftChild = 2 * $nodeId - User::baseId() + 1;
         $rightChild = $leftChild + 1;
 
         return [
@@ -85,7 +83,7 @@ class BinaryTreePage extends Page
     protected function getViewData(): array
     {
         return [
-            'baseId' => $this->baseId,
+            'baseId' => User::baseId(),
             'expandedNodes' => $this->expandedNodes,
             'connections' => $this->connections,
         ];

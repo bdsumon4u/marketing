@@ -1,12 +1,11 @@
 <x-filament-panels::page>
     <div class="binary-tree"
         x-data="binaryTree()"
-        {{-- I don't know why this works --}}
-        x-effect="connections && $nextTick(() => draw())"
+        @expanded="$nextTick(() => draw())"
     >
         <div class="tree-container" style="position:relative;">
             <svg class="tree-svg" style="position:absolute; left:0; top:0; pointer-events:none; z-index:0;"></svg>
-            @include('filament.pages.partials.binary-tree-node', ['nodeId' => $baseId, 'expandedNodes' => $expandedNodes])
+            <livewire:tree-node :node-id="$baseId" expanded />
         </div>
     </div>
 
@@ -101,15 +100,31 @@
 <script>
 function binaryTree() {
     return {
-        connections: @entangle('connections').live,
+        connections: [],
+        interval: null,
+        init() {
+            this.$nextTick(() => this.draw());
+            // this.interval = setTimeout(() => this.draw(), 200);
+            window.addEventListener('resize', () => this.draw());
+        },
         draw() {
             const container = document.querySelector('.tree-container');
             const svg = container ? container.querySelector('.tree-svg') : null;
             if (!svg) return;
-
             svg.setAttribute('width', container.scrollWidth);
             svg.setAttribute('height', container.scrollHeight);
             svg.innerHTML = '';
+
+            // Build connections from DOM
+            this.connections = [];
+            const cards = Array.from(container.querySelectorAll('.user-card[data-node-id]'));
+            cards.forEach(card => {
+                const nodeId = card.getAttribute('data-node-id');
+                const parentId = card.getAttribute('data-parent-id');
+                if (parentId && parentId !== 'null') {
+                    this.connections.push([parentId, nodeId]);
+                }
+            });
 
             this.connections.forEach(([parentId, childId]) => {
                 const parentCard = container.querySelector(`.user-card[data-node-id='${parentId}']`);
