@@ -1,4 +1,5 @@
 <div class="tree-node">
+    @if($user)
     <div class="user-card"
         data-node-id="{{ $user->id }}"
         data-parent-id="{{ $user->parentId() }}"
@@ -19,6 +20,7 @@
         <x-filament::button wire:click="expand">Next</x-filament::button>
         @endunless
     </div>
+    @endif
     @if($expanded)
     <div class="tree-level">
         <livewire:tree-node :node-id="$user->leftId()" />

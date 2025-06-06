@@ -155,14 +155,14 @@ function binaryTree() {
                     const junctionY = Math.min(...childYs) - 24;
 
                     // 1. Vertical from parent to junction
-                    svg.appendChild(line(parentX, parentY, parentX, junctionY));
+                    svg.appendChild(line(parentX, parentY, parentX, junctionY, parentId, null));
 
                     // 2. Horizontal from left child x to right child x at junctionY
-                    svg.appendChild(line(childXs[0], junctionY, childXs[1], junctionY));
+                    svg.appendChild(line(childXs[0], junctionY, childXs[1], junctionY, parentId, null));
 
                     // 3. Verticals from junction to each child
-                    svg.appendChild(line(childXs[0], junctionY, childXs[0], childYs[0]));
-                    svg.appendChild(line(childXs[1], junctionY, childXs[1], childYs[1]));
+                    svg.appendChild(line(childXs[0], junctionY, childXs[0], childYs[0], parentId, childIds[0]));
+                    svg.appendChild(line(childXs[1], junctionY, childXs[1], childYs[1], parentId, childIds[1]));
                 } else if (childIds.length === 1) {
                     // Only one child: straight line
                     const childCard = container.querySelector(`.user-card[data-node-id='${childIds[0]}']`);
@@ -170,11 +170,11 @@ function binaryTree() {
                     const childRect = childCard.getBoundingClientRect();
                     const childX = childRect.left + childRect.width / 2 - containerRect.left + container.scrollLeft;
                     const childY = childRect.top - containerRect.top + container.scrollTop;
-                    svg.appendChild(line(parentX, parentY, childX, childY));
+                    svg.appendChild(line(parentX, parentY, childX, childY, parentId, childIds[0]));
                 }
             });
 
-            function line(x1, y1, x2, y2) {
+            function line(x1, y1, x2, y2, parentId = null, childId = null) {
                 const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 l.setAttribute('x1', x1);
                 l.setAttribute('y1', y1);
@@ -183,6 +183,9 @@ function binaryTree() {
                 l.setAttribute('stroke', '#e5e7eb');
                 l.setAttribute('stroke-width', '3');
                 l.setAttribute('stroke-linecap', 'round');
+                l.classList.add('svg-connection-line');
+                if (parentId) l.setAttribute('data-parent-id', parentId);
+                if (childId) l.setAttribute('data-child-id', childId);
                 return l;
             }
         },
@@ -191,15 +194,21 @@ function binaryTree() {
             if (!nodeCard) return;
             nodeCard.classList.toggle('highlight', highlight);
 
+            // Highlight all lines where this node is either parent or child
+            document.querySelectorAll(`.svg-connection-line`).forEach(line => {
+                const parentId = line.getAttribute('data-parent-id');
+                const childId = line.getAttribute('data-child-id');
+                if (parentId == nodeId || childId == nodeId) {
+                    line.classList.toggle('svg-line-highlight', highlight);
+                }
+            });
+
+            // Highlight children
             this.connections.forEach(([parentId, childId]) => {
                 if (parentId == nodeId) {
                     const childCard = document.querySelector(`.user-card[data-node-id='${childId}']`);
                     if (childCard) {
                         childCard.classList.toggle('highlight-child', highlight);
-                    }
-                    const line = document.querySelector(`.svg-connection-line[data-parent-id='${parentId}'][data-child-id='${childId}']`);
-                    if (line) {
-                        line.classList.toggle('svg-line-highlight', highlight);
                     }
                 }
             });
