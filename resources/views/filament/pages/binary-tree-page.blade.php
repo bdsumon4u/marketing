@@ -104,13 +104,13 @@ function binaryTree() {
         interval: null,
         init() {
             this.$nextTick(() => this.draw());
-            // this.interval = setTimeout(() => this.draw(), 200);
             window.addEventListener('resize', () => this.draw());
         },
         draw() {
             const container = document.querySelector('.tree-container');
             const svg = container ? container.querySelector('.tree-svg') : null;
             if (!svg) return;
+
             svg.setAttribute('width', container.scrollWidth);
             svg.setAttribute('height', container.scrollHeight);
             svg.innerHTML = '';
@@ -126,29 +126,65 @@ function binaryTree() {
                 }
             });
 
+            // Group connections by parent
+            const grouped = {};
             this.connections.forEach(([parentId, childId]) => {
-                const parentCard = container.querySelector(`.user-card[data-node-id='${parentId}']`);
-                const childCard = container.querySelector(`.user-card[data-node-id='${childId}']`);
-                if (!parentCard || !childCard) return;
-                const parentRect = parentCard.getBoundingClientRect();
-                const childRect = childCard.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
-                const startX = parentRect.left + parentRect.width / 2 - containerRect.left + container.scrollLeft;
-                const startY = parentRect.bottom - containerRect.top + container.scrollTop;
-                const endX = childRect.left + childRect.width / 2 - containerRect.left + container.scrollLeft;
-                const endY = childRect.top - containerRect.top + container.scrollTop;
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', startX);
-                line.setAttribute('y1', startY);
-                line.setAttribute('x2', endX);
-                line.setAttribute('y2', endY);
-                line.setAttribute('stroke', '#e5e7eb');
-                line.setAttribute('stroke-width', '2');
-                line.setAttribute('data-parent-id', parentId);
-                line.setAttribute('data-child-id', childId);
-                line.classList.add('svg-connection-line');
-                svg.appendChild(line);
+                if (!grouped[parentId]) grouped[parentId] = [];
+                grouped[parentId].push(childId);
             });
+
+            Object.entries(grouped).forEach(([parentId, childIds]) => {
+                const parentCard = container.querySelector(`.user-card[data-node-id='${parentId}']`);
+                if (!parentCard) return;
+
+                const parentRect = parentCard.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                const parentX = parentRect.left + parentRect.width / 2 - containerRect.left + container.scrollLeft;
+                const parentY = parentRect.bottom - containerRect.top + container.scrollTop;
+
+                if (childIds.length === 2) {
+                    // Two children: draw vertical, horizontal, and two verticals
+                    const childCards = childIds.map(id => container.querySelector(`.user-card[data-node-id='${id}']`));
+                    if (childCards.some(card => !card)) return;
+
+                    const childRects = childCards.map(card => card.getBoundingClientRect());
+                    const childXs = childRects.map(rect => rect.left + rect.width / 2 - containerRect.left + container.scrollLeft);
+                    const childYs = childRects.map(rect => rect.top - containerRect.top + container.scrollTop);
+
+                    // Junction y: a bit above children
+                    const junctionY = Math.min(...childYs) - 24;
+
+                    // 1. Vertical from parent to junction
+                    svg.appendChild(line(parentX, parentY, parentX, junctionY));
+
+                    // 2. Horizontal from left child x to right child x at junctionY
+                    svg.appendChild(line(childXs[0], junctionY, childXs[1], junctionY));
+
+                    // 3. Verticals from junction to each child
+                    svg.appendChild(line(childXs[0], junctionY, childXs[0], childYs[0]));
+                    svg.appendChild(line(childXs[1], junctionY, childXs[1], childYs[1]));
+                } else if (childIds.length === 1) {
+                    // Only one child: straight line
+                    const childCard = container.querySelector(`.user-card[data-node-id='${childIds[0]}']`);
+                    if (!childCard) return;
+                    const childRect = childCard.getBoundingClientRect();
+                    const childX = childRect.left + childRect.width / 2 - containerRect.left + container.scrollLeft;
+                    const childY = childRect.top - containerRect.top + container.scrollTop;
+                    svg.appendChild(line(parentX, parentY, childX, childY));
+                }
+            });
+
+            function line(x1, y1, x2, y2) {
+                const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                l.setAttribute('x1', x1);
+                l.setAttribute('y1', y1);
+                l.setAttribute('x2', x2);
+                l.setAttribute('y2', y2);
+                l.setAttribute('stroke', '#e5e7eb');
+                l.setAttribute('stroke-width', '3');
+                l.setAttribute('stroke-linecap', 'round');
+                return l;
+            }
         },
         highlightNode(nodeId, highlight) {
             const nodeCard = document.querySelector(`.user-card[data-node-id='${nodeId}']`);
