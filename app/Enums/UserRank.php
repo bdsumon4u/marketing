@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-enum UserRank: int
+use Filament\Support\Contracts\HasLabel;
+
+enum UserRank: int implements HasLabel
 {
     case _M = 0;
     case AM = 1;
@@ -20,5 +22,10 @@ enum UserRank: int
     public static function getMaximumRank(): int
     {
         return self::FM->value;
+    }
+
+    public function getLabel(): string
+    {
+        return $this->name;
     }
 }

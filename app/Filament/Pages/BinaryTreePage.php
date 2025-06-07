@@ -9,11 +9,15 @@ class BinaryTreePage extends Page
 {
     protected static string $view = 'filament.pages.binary-tree-page';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-share';
 
     protected static ?string $navigationLabel = 'Binary Tree';
 
     protected static ?string $title = 'Binary Tree Visualization';
+
+    protected static ?string $navigationGroup = 'Visualization';
+
+    protected ?string $heading = '';
 
     protected static ?int $navigationSort = 1;
 
@@ -87,10 +91,5 @@ class BinaryTreePage extends Page
             'expandedNodes' => $this->expandedNodes,
             'connections' => $this->connections,
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Visualization';
     }
 }

@@ -17,7 +17,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
     {
@@ -42,15 +42,23 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Phone')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('rank')
+                    ->label('Rank')
+                    ->searchable()
+                    ->sortable()
+                    ->badge(),
                 Tables\Columns\TextColumn::make('total_deposit')
                     ->label('Total Deposit')
-                    ->money(),
+                    ->money()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('total_withdraw')
                     ->label('Total Withdraw')
-                    ->money(),
+                    ->money()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('total_income')
                     ->label('Total Income')
-                    ->money(),
+                    ->money()
+                    ->sortable(),
             ])
             ->filters([
                 //

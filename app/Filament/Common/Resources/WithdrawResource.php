@@ -24,7 +24,7 @@ class WithdrawResource extends Resource
 
     protected static ?string $modelLabel = 'Withdraw';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
     public static function form(Form $form): Form
     {
@@ -85,7 +85,8 @@ class WithdrawResource extends Resource
                     ->sortable(),
                 Tables\Columns\IconColumn::make('confirmed')
                     ->boolean()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->sortable(),
             ])
             ->filters([
                 //

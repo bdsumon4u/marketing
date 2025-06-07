@@ -23,7 +23,7 @@ class DepositResource extends Resource
 
     protected static ?string $modelLabel = 'Deposit';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     public static function form(Form $form): Form
     {
@@ -70,7 +70,8 @@ class DepositResource extends Resource
                     ->tooltip(fn (Transaction $record): string => $record->meta['transaction_id'] ?? ''),
                 Tables\Columns\IconColumn::make('confirmed')
                     ->boolean()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->sortable(),
             ])
             ->filters([
                 //

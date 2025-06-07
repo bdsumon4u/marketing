@@ -19,7 +19,7 @@ class IncomeResource extends Resource
 
     protected static ?string $modelLabel = 'Income';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-trending-up';
 
     public static function form(Form $form): Form
     {
