@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\User;
+use Filament\Facades\Filament;
 use Livewire\Component;
 
 class TreeNode extends Component
@@ -24,6 +25,8 @@ class TreeNode extends Component
 
     public function render()
     {
-        return view('livewire.tree-node');
+        return view('livewire.tree-node', [
+            'panelId' => Filament::getCurrentPanel()->getId(),
+        ]);
     }
 }

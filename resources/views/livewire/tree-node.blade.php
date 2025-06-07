@@ -16,7 +16,13 @@
                 </svg>
             </div>
             <div class="user-info">
-                <div class="user-id">ID: {{ $user->id }}</div>
+                <a
+                    wire:navigate
+                    class="user-id"
+                    @if($panelId === 'admin')
+                    href="{{ url()->current() }}?base_id={{ $user->id }}"
+                    @endif
+                >ID: {{ $user->id }}</a>
                 <div class="user-name">{{ $user->name }}</div>
                 <div class="user-username">{{ '@' . $user->username }}</div>
             </div>
