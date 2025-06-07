@@ -490,7 +490,7 @@ return [
              *
              * @var string
              */
-            'name' => env('WALLET_DEFAULT_WALLET_NAME', 'Default Wallet'),
+            'name' => env('WALLET_DEFAULT_WALLET_NAME', 'Deposit Wallet'),
 
             /**
              * The slug of the default wallet.

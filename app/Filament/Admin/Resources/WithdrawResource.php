@@ -7,6 +7,7 @@ use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -149,6 +150,27 @@ class WithdrawResource extends Resource
                     ->modalHeading('Confirm Transaction')
                     ->modalDescription('Are you sure you want to confirm this transaction?')
                     ->modalSubmitActionLabel('Yes, confirm'),
+                Tables\Actions\ViewAction::make()
+                    ->icon('heroicon-o-eye')
+                    ->color('success')
+                    ->visible(fn (Transaction $record): bool => $record->confirmed)
+                    ->infolist([
+                        TextEntry::make('payable.name')
+                            ->label('User'),
+                        TextEntry::make('amountFloat')
+                            ->label('Amount')
+                            ->formatStateUsing(fn (Transaction $record): string => Number::currency(abs($record->amountFloat))),
+                        TextEntry::make('created_at')
+                            ->label('Date')
+                            ->date()
+                            ->tooltip(fn (Transaction $record): string => $record->created_at->format(
+                                Table::$defaultTimeDisplayFormat,
+                            )),
+                        TextEntry::make('meta.transaction_id')
+                            ->label('Transaction ID'),
+                        TextEntry::make('meta.bkash_number')
+                            ->label('bKash Number'),
+                    ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

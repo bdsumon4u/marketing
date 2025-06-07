@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Admin\Resources;
+namespace App\Filament\Common\Resources;
 
-use App\Filament\Admin\Resources\DepositResource\Pages;
+use App\Filament\Common\Resources\DepositResource\Pages;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
 use Filament\Forms;

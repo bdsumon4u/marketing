@@ -7,10 +7,13 @@ use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
 use Filament\Facades\Filament;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Number;
 
 class DepositResource extends Resource
 {
@@ -42,34 +45,55 @@ class DepositResource extends Resource
                     ->with('wallet');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('payable.username')
+                Tables\Columns\TextColumn::make('payable.name')
                     ->label('User')
+                    ->description(fn (Model $record): string => $record->payable->username)
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('wallet.name')
+                    ->label('Wallet')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amountFloat')
                     ->label('Amount')
                     ->money(),
-                Tables\Columns\TextColumn::make('wallet.name')
-                    ->label('Wallet')
-                    ->searchable()
-                    ->sortable(),
+                Tables\Columns\IconColumn::make('confirmed')
+                    ->boolean()
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date')
                     ->date()
-                    ->tooltip(function (Transaction $record): string {
+                    ->description(function (Transaction $record): string {
                         return $record->created_at->format(
                             Table::$defaultTimeDisplayFormat,
                         );
                     }),
-                Tables\Columns\IconColumn::make('confirmed')
-                    ->boolean()
-                    ->alignCenter(),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->icon('heroicon-o-eye')
+                    ->color('success')
+                    ->visible(fn (Transaction $record): bool => $record->confirmed)
+                    ->infolist([
+                        TextEntry::make('payable.name')
+                            ->label('User')
+                            ->helperText(fn (Transaction $record): string => $record->payable->username),
+                        TextEntry::make('amountFloat')
+                            ->label('Amount')
+                            ->formatStateUsing(fn (Transaction $record): string => Number::currency(abs($record->amountFloat))),
+                        TextEntry::make('created_at')
+                            ->label('Date')
+                            ->date()
+                            ->helperText(fn (Transaction $record): string => $record->created_at->format(
+                                Table::$defaultTimeDisplayFormat,
+                            )),
+                        TextEntry::make('meta.transaction_id')
+                            ->label('Transaction ID'),
+                    ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
