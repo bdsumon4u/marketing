@@ -5,6 +5,7 @@ namespace App\Filament\Common\Resources;
 use App\Filament\Common\Resources\DepositResource\Pages;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\TextEntry;
@@ -45,29 +46,31 @@ class DepositResource extends Resource
                     ->with(['payable', 'wallet']);
             })
             ->columns([
-                Tables\Columns\TextColumn::make('payable.name')
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Date')
+                    ->date()
+                    ->tooltip(function (Transaction $record): string {
+                        return $record->created_at->format(
+                            Table::$defaultTimeDisplayFormat,
+                        );
+                    }),
+                Tables\Columns\TextColumn::make('payable.username')
+                    ->tooltip(fn (Transaction $record): string => $record->payable->name)
                     ->label('User')
-                    ->description(fn (Transaction $record): string => $record->payable->username)
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->visible(fn () => Filament::getCurrentPanel()->getId() === 'admin'),
                 Tables\Columns\TextColumn::make('wallet.name')
                     ->label('Wallet')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amountFloat')
                     ->label('Amount')
-                    ->money(),
+                    ->money()
+                    ->tooltip(fn (Transaction $record): string => $record->meta['transaction_id'] ?? ''),
                 Tables\Columns\IconColumn::make('confirmed')
                     ->boolean()
                     ->alignCenter(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Date')
-                    ->date()
-                    ->description(function (Transaction $record): string {
-                        return $record->created_at->format(
-                            Table::$defaultTimeDisplayFormat,
-                        );
-                    }),
             ])
             ->filters([
                 //
@@ -77,7 +80,7 @@ class DepositResource extends Resource
                     ->slideOver()
                     ->icon('heroicon-o-eye')
                     ->color('success')
-                    ->visible(fn (Transaction $record): bool => ! $record->confirmed)
+                    ->visible(fn (Transaction $record): bool => Filament::getCurrentPanel()->getId() === 'admin' && ! $record->confirmed)
                     ->form([
                         Forms\Components\TextInput::make('amount')
                             ->label('Amount')
@@ -148,7 +151,6 @@ class DepositResource extends Resource
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-o-eye')
                     ->color('success')
-                    ->visible(fn (Transaction $record): bool => $record->confirmed)
                     ->infolist([
                         TextEntry::make('payable.name')
                             ->label('User')

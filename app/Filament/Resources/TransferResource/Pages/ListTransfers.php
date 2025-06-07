@@ -30,7 +30,7 @@ class ListTransfers extends ListRecords
                     ] : [];
                 })
                 ->using(function (array $data, Actions\Action $action) {
-                    $sender = value(fn(): User => Filament::auth()->user());
+                    $sender = value(fn (): User => Filament::auth()->user());
 
                     if ($sender->balanceFloat < $data['amount']) {
                         $action->failureNotificationTitle('Insufficient balance')->failure();
@@ -41,7 +41,7 @@ class ListTransfers extends ListRecords
                     if ($receiver = User::query()->where('username', $data['transfer_to'])->first()) {
                         $record = $sender->transferFloat($receiver, $data['amount'], [
                             'action' => 'transfer',
-                            'message' => 'Transfer from #' . $sender->username . ' to #' . $receiver->username,
+                            'message' => 'Transfer from #'.$sender->username.' to #'.$receiver->username,
                         ]);
 
                         $sender->increment('total_send', $data['amount'] * 100);
@@ -50,7 +50,7 @@ class ListTransfers extends ListRecords
                         Notification::make()
                             ->success()
                             ->title('Received money')
-                            ->body('You\'ve received ' . Number::currency($data['amount']) . ' from #' . $sender->username)
+                            ->body('You\'ve received '.Number::currency($data['amount']).' from #'.$sender->username)
                             ->sendToDatabase($receiver);
 
                         $action->successNotificationTitle('Transfer success');

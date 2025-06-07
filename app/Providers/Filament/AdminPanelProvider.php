@@ -42,6 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             // ->databaseNotificationsPolling(null)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
+            ->discoverResources(in: app_path('Filament/Common/Resources'), for: 'App\\Filament\\Common\\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
             ->pages([
                 // Pages\Dashboard::class,

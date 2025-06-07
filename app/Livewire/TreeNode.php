@@ -8,6 +8,7 @@ use Livewire\Component;
 class TreeNode extends Component
 {
     public ?User $user = null;
+
     public bool $expanded = false;
 
     public function mount($nodeId)

@@ -24,7 +24,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable implements Confirmable, FilamentUser, MustVerifyEmail, WalletFloatInterface, WalletInterface
+class User extends Authenticatable implements Confirmable, FilamentUser, /* MustVerifyEmail, */ WalletFloatInterface, WalletInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use CanConfirm, HasFactory, HasWalletFloat, HasWallets, Notifiable;

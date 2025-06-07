@@ -2,10 +2,9 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Common\Resources\WithdrawResource;
 use App\Filament\Pages\ProductPage;
-use App\Filament\Pages\Transfer;
 use App\Filament\Resources\TransferResource;
-use App\Filament\Resources\WithdrawResource;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
