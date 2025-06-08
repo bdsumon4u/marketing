@@ -3,12 +3,16 @@
     {{ $this->filtersForm }}
     @endif
 
-    <x-filament-widgets::widgets :columns="$this->getColumns()" :data="
+    <x-filament-widgets::widgets
+        :columns="$this->getColumns()"
+        :data="
             [
                 ...(property_exists($this, 'filters') ? ['filters' => $this->filters] : []),
                 ...$this->getWidgetData(),
             ]
-        " :widgets="$this->getVisibleWidgets()" />
+        "
+        :widgets="$this->getVisibleWidgets()"
+    />
 
     @php
     $colorMap = [

@@ -6,6 +6,7 @@ use App\Enums\UserRank;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Console\Command;
+use Illuminate\Support\Number;
 
 class DistributeSpecialFunds extends Command
 {
@@ -35,22 +36,22 @@ class DistributeSpecialFunds extends Command
             ->get()
             ->groupBy('rank');
 
-        $this->info('Distributing special funds to users...');
-        $this->info('Users: ' . $users->count());
+        $this->info('Distributing special funds to ' . $users->count() . ' users...');
 
         foreach ($users as $rank => $users) {
             $rank = UserRank::from($rank);
-            $this->info('Rank: ' . $rank->name);
-            $this->info('Users: ' . $users->count());
+            $this->info('Users: '.$users->count().' has rank: '.$rank->name);
             $wallet = Wallet::company()->getWallet($rank->getWalletSlug());
-            $amount = $wallet->balanceFloat / count($users);
-            $this->info('Amount: ' . $amount);
+            $amountPerUser = $wallet->balanceFloat / count($users);
+            $this->info('Amount per user: '.Number::currency($amountPerUser));
             foreach ($users as $user) {
-                $wallet->transferFloat($user->getOrCreateWallet('earning'), $amount, [
+                $wallet->transferFloat($user->getOrCreateWallet('earning'), $amountPerUser, [
+                    'action' => 'income',
                     'type' => 'special',
                     'description' => 'Rank fund distribution',
                     'reference' => $rank->getWalletSlug(),
                 ]);
+                $this->info('Transferred '.Number::currency($amountPerUser).' to '.$user->username);
             }
             $this->info('--------------------------------');
         }

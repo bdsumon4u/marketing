@@ -65,9 +65,9 @@
 
         @foreach ($rows as $i => $row)
             <div class="grid gap-4 mb-4
+                @if(count($row) === 2) grid-cols-1 md:grid-cols-2 @endif
                 @if(count($row) === 3) grid-cols-1 md:grid-cols-3 @endif
                 @if(count($row) === 4) grid-cols-1 md:grid-cols-4 @endif
-                @if(count($row) === 2) grid-cols-1 md:grid-cols-2 @endif
             ">
                 @foreach ($row as $stat)
                     <div @class([
