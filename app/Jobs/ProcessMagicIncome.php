@@ -41,12 +41,12 @@ class ProcessMagicIncome implements ShouldQueue
     protected function buildMagicLink(User $user, $limit = 10): Collection
     {
         $link = [];
-        $currentId = $user->id - 1000;
+        $currentId = $user->id - User::baseId() + 1;
         for ($i = 0; $i < $limit; $i++) {
             $currentId = (int) ($currentId / 2);
             $link[] = $currentId;
         }
-        $link = array_map(fn ($id) => $id + 1000, $link);
+        $link = array_map(fn ($id) => $id + User::baseId() - 1, $link);
 
         return User::whereIn('id', $link)->where('is_active', true)->get();
     }

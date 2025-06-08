@@ -39,7 +39,7 @@ class ActivateUserAccount implements ShouldQueue
             ->get()
             ->groupBy('rank')
             ->map(fn ($group) => $group->count())
-            ->filter(fn ($count) => $count >= 2)
+            ->filter(fn ($count) => $count >= config('mlm.rank_threshold'))
             ->keys()
             ->max();
 
@@ -50,7 +50,7 @@ class ActivateUserAccount implements ShouldQueue
         $newRank = $maxRank + 1;
 
         if ($user->rank !== $newRank) {
-            $user->update(['rank' => $newRank]);
+            $user->update(['rank' => $newRank, 'rank_updated_at' => now()]);
             $this->calculateAndUpdateRanks($user->referrer);
         }
     }

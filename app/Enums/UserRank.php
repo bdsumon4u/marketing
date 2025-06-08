@@ -28,4 +28,9 @@ enum UserRank: int implements HasLabel
     {
         return $this->name;
     }
+
+    public function getWalletSlug(): string
+    {
+        return strtolower($this->name) . '-fund';
+    }
 }

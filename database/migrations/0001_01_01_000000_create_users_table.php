@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->unsignedTinyInteger('rank')->default(UserRank::_M);
+            $table->timestamp('rank_updated_at')->useCurrent();
             $table->boolean('is_active')->default(false);
 
             $table->integer('total_deposit')->default(0);

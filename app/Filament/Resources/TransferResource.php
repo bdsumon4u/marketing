@@ -30,11 +30,9 @@ class TransferResource extends Resource
                     ->validationAttribute('username')
                     ->label('Transfer To (username)')
                     ->exists('users', 'username')
-                    ->default('alexhari')
                     ->required(),
                 Forms\Components\TextInput::make('amount')
                     ->prefix(Number::defaultCurrency())
-                    ->default(45)
                     ->required(),
             ])
             ->columns(1);

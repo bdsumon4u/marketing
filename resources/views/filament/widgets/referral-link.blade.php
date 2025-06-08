@@ -7,17 +7,17 @@
                 id="referral-link">
             <div x-data>
                 <button @click="
-                                    const input = document.getElementById('referral-link');
-                                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                                        navigator.clipboard.writeText(input.value).then(() => {
-                                            $wire.notifyCopied();
-                                        });
-                                    } else {
-                                        input.select();
-                                        document.execCommand('copy');
-                                        $wire.notifyCopied();
-                                    }
-                                " class="flex items-center px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
+                    const input = document.getElementById('referral-link');
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(input.value).then(() => {
+                            $wire.notifyCopied();
+                        });
+                    } else {
+                        input.select();
+                        document.execCommand('copy');
+                        $wire.notifyCopied();
+                    }
+                " class="flex items-center px-3 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">
                     <x-heroicon-o-clipboard-document class="w-5 h-5 mr-1" />
                     Copy
                 </button>

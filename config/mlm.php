@@ -14,4 +14,14 @@ return [
         'with_product' => 1000,
         'without_product' => 500,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rank Threshold
+    |--------------------------------------------------------------------------
+    |
+    | This is the minimum number of active referrals required to achieve a new rank.
+    |
+    */
+    'rank_threshold' => 5,
 ];
