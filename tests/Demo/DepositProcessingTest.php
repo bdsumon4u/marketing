@@ -2,6 +2,7 @@
 
 namespace Tests\Demo;
 
+use App\Livewire\AddFundModal;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Carbon;
@@ -42,11 +43,10 @@ class DepositProcessingTest extends TestCase
         $amount = mt_rand(500, 2500);
 
         // Simulate deposit process using Livewire
-        Livewire::actingAs($user)
-            ->test(\App\Livewire\AddFundModal::class)
-            ->set('data.amount', $amount)
-            ->set('data.transaction_id', 'TRX'.str_pad($index, 6, '0', STR_PAD_LEFT))
-            ->call('submit');
+        new AddFundModal()->processDeposit($user, [
+            'amount' => $amount,
+            'transaction_id' => 'TRX'.str_pad($index, 6, '0', STR_PAD_LEFT),
+        ]);
 
         // Get the latest deposit transaction
         $deposit = $user->transactions()

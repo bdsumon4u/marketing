@@ -47,6 +47,13 @@ class AddFundModal extends Component implements HasForms
         $data = $this->form->getState();
         $user = value(fn (): User => Filament::auth()->user());
 
+        $this->processDeposit($user, $data);
+
+        $this->dispatch('close-modal', id: 'add-fund-modal');
+    }
+
+    public function processDeposit(User $user, array $data): void
+    {
         if ($user->hasPendingDeposit($data['amount'], $minutes = 10)) {
             Notification::make()
                 ->danger()
@@ -80,8 +87,6 @@ class AddFundModal extends Component implements HasForms
             ->title('New deposit request')
             ->body('A new deposit request has been made by @'.$user->username.' for '.Number::currency($data['amount']).' BDT.')
             ->sendToDatabase(Admin::all());
-
-        $this->dispatch('close-modal', id: 'add-fund-modal');
     }
 
     public function render()

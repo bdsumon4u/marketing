@@ -2,6 +2,7 @@
 
 namespace Tests\Demo;
 
+use App\Livewire\VerifyNowModal;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
@@ -51,10 +52,7 @@ class AccountVerificationTest extends TestCase
 
         $package = $withProduct ? 'with_product' : 'without_product';
 
-        Livewire::actingAs($user)
-            ->test(\App\Livewire\VerifyNowModal::class)
-            ->set('data.package', $package)
-            ->call('submit');
+        new VerifyNowModal()->verifyUser($user, ['package' => $package]);
 
         if ($withProduct) {
             $this->stats['with_product']++;

@@ -50,6 +50,13 @@ class VerifyNowModal extends Component implements HasForms
         $data = $this->form->getState();
         $user = value(fn (): User => Filament::auth()->user());
 
+        $this->verifyUser($user, $data);
+
+        $this->dispatch('close-modal', id: 'verify-now-modal');
+    }
+
+    public function verifyUser(User $user, array $data): void
+    {
         if ($user->is_active) {
             Notification::make()
                 ->info()
@@ -83,8 +90,6 @@ class VerifyNowModal extends Component implements HasForms
             ->success()
             ->title('Account is being verified...')
             ->send();
-
-        $this->dispatch('close-modal', id: 'verify-now-modal');
     }
 
     public function render()

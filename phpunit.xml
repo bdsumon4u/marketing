@@ -14,6 +14,11 @@
         <testsuite name="Demo">
             <directory>tests/Demo</directory>
         </testsuite>
+        <testsuite name="SequentialDemo">
+            <file>tests/Demo/UserGenerationTest.php</file>
+            <file>tests/Demo/DepositProcessingTest.php</file>
+            <file>tests/Demo/AccountVerificationTest.php</file>
+        </testsuite>
     </testsuites>
     <source>
         <include>
