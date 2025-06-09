@@ -68,6 +68,7 @@ class User extends Authenticatable implements Confirmable, FilamentUser, /* Must
             'is_active' => 'boolean',
             'with_product' => 'boolean',
             'rank' => UserRank::class,
+            'rank_updated_at' => 'datetime',
             'total_deposit' => Money::class,
             'total_income' => Money::class,
             'total_withdraw' => Money::class,

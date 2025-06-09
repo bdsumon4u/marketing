@@ -22,12 +22,61 @@ class UserFactory extends Factory
      */
     public function configure(): static
     {
-        return $this->afterCreating(fn (User $user) => $user->update([
-            'referrer_id' => fake()->optional()->numberBetween(
-                $baseId = User::baseId(),
-                min($baseId + 20, User::max('id') - 1),
-            ),
-        ]));
+        return $this->afterCreating(function (User $user) {
+            $rankThreshold = config('mlm.rank_threshold');
+            $baseId = User::baseId();
+            $maxReferrals = $rankThreshold + 2;
+
+            // Get the 2 most recent users who have reached the rank threshold
+            $qualifiedReferrers = User::whereHas('referrals', function ($query) {}, '>=', $rankThreshold)
+                ->latest()
+                ->take(2)
+                ->get();
+
+            if ($qualifiedReferrers->count() === 2) {
+                // Get all referrals of these 2 most recent qualified users
+                // but only include users who haven't reached max referrals
+                $referralIds = $qualifiedReferrers->flatMap(function ($user) use ($maxReferrals) {
+                    return $user->referrals()
+                        ->whereDoesntHave('referrals', function ($query) use ($maxReferrals) {
+                            $query->select('referrer_id')
+                                ->groupBy('referrer_id')
+                                ->havingRaw('COUNT(*) >= ?', [$maxReferrals]);
+                        })
+                        ->pluck('id');
+                })->toArray();
+
+                if (! empty($referralIds)) {
+                    $user->update([
+                        'referrer_id' => fake()->randomElement($referralIds),
+                    ]);
+
+                    return;
+                }
+            }
+
+            // If no qualified referrers or their referrals, assign from first n users
+            // but only include users who haven't reached max referrals
+            $availableReferrers = User::whereBetween('id', [$baseId, min($baseId + $rankThreshold - 1, User::max('id') - 1)])
+                ->whereDoesntHave('referrals', function ($query) use ($maxReferrals) {
+                    $query->select('referrer_id')
+                        ->groupBy('referrer_id')
+                        ->havingRaw('COUNT(*) >= ?', [$maxReferrals]);
+                })
+                ->pluck('id')
+                ->toArray();
+
+            if (! empty($availableReferrers)) {
+                $user->update([
+                    'referrer_id' => fake()->optional()->randomElement($availableReferrers),
+                ]);
+
+                return;
+            }
+
+            // If no available referrers, set to null
+            $user->update(['referrer_id' => null]);
+        });
     }
 
     /**

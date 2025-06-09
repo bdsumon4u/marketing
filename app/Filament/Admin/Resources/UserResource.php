@@ -51,7 +51,10 @@ class UserResource extends Resource
                     ->label('Rank')
                     ->searchable()
                     ->sortable()
-                    ->badge(),
+                    ->badge()
+                    ->tooltip(fn (User $record): string => $record->rank_updated_at->format(
+                        Table::$defaultDateTimeDisplayFormat,
+                    )),
                 Tables\Columns\TextColumn::make('total_deposit')
                     ->label('Total Deposit')
                     ->money()
