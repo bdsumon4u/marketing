@@ -26,6 +26,7 @@ class ProcessMagicIncome implements ShouldQueue
      */
     public function handle(): void
     {
+        info('Processing magic income', ['user' => $this->user->id, 'package' => $this->package]);
         $link = $this->buildMagicLink($this->user);
         $companyWallet = Wallet::company()->getWallet(CompanyWalletType::COMPANY->value);
         foreach ($link as $user) {
@@ -35,6 +36,7 @@ class ProcessMagicIncome implements ShouldQueue
                 'user_id' => $this->user->id,
             ]);
             $user->increment('magic_income', $user->getMagicIncome() * 100);
+            $user->increment('total_income', $user->getMagicIncome() * 100);
         }
     }
 

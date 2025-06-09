@@ -25,6 +25,7 @@ class ProcessCompanyFund implements ShouldQueue
      */
     public function handle(): void
     {
+        info('Processing company fund', ['user' => $this->user->id, 'package' => $this->package]);
         $companyWallet = Wallet::company()->getWallet(CompanyWalletType::COMPANY->value);
         foreach (Wallet::company()->wallets()->with('holder')->oldest('id')->get() as $wallet) {
             if ($wallet->slug === CompanyWalletType::COMPANY->value) {

@@ -25,6 +25,7 @@ class ProcessReferralIncentive implements ShouldQueue
      */
     public function handle(): void
     {
+        info('Processing referral incentive', ['user' => $this->user->id, 'package' => $this->package]);
         $referralChain = $this->buildReferralChain($this->user);
         $companyWallet = Wallet::company()->getWallet(CompanyWalletType::COMPANY->value);
         $distributedAmount = 0;
@@ -47,6 +48,7 @@ class ProcessReferralIncentive implements ShouldQueue
             } else {
                 $referrer->increment('generation_income', $incentiveAmount * 100);
             }
+            $referrer->increment('total_income', $incentiveAmount * 100);
         }
     }
 
