@@ -89,7 +89,10 @@ class WithdrawResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\TernaryFilter::make('confirmed')
+                    ->trueLabel('Confirmed')
+                    ->falseLabel('Pending')
+                    ->label('Status'),
             ])
             ->actions([
                 Tables\Actions\Action::make('review')

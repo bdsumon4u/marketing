@@ -2,12 +2,14 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Enums\UserRank;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
 class UserResource extends Resource
 {
@@ -57,10 +59,17 @@ class UserResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('rank')
+                    ->options(UserRank::class)
+                    ->label('Rank'),
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->trueLabel('Active')
+                    ->falseLabel('Inactive')
+                    ->label('Status'),
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
+                Impersonate::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

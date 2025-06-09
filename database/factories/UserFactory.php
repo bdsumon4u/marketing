@@ -23,8 +23,9 @@ class UserFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(fn (User $user) => $user->update([
-            'referrer_id' => fake()->optional()->randomElement(
-                User::where('id', '<', $user->id)->pluck('id')->toArray()
+            'referrer_id' => fake()->optional()->numberBetween(
+                $baseId = User::baseId(),
+                min($baseId + 50, User::max('id') - 1),
             ),
         ]));
     }
