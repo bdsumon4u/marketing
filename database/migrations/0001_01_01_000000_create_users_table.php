@@ -26,6 +26,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('rank')->default(UserRank::_M);
             $table->timestamp('rank_updated_at')->useCurrent();
             $table->boolean('is_active')->default(false);
+            $table->boolean('with_product')->default(false);
 
             $table->integer('total_deposit')->default(0);
             $table->integer('total_income')->default(0);

@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Enums\UserRank;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -40,6 +41,12 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Phone')
                     ->searchable(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Status')
+                    ->boolean(),
+                Tables\Columns\IconColumn::make('with_product')
+                    ->label('Product')
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('rank')
                     ->label('Rank')
                     ->searchable()
@@ -66,10 +73,16 @@ class UserResource extends Resource
                     ->trueLabel('Active')
                     ->falseLabel('Inactive')
                     ->label('Status'),
+                Tables\Filters\TernaryFilter::make('with_product')
+                    ->trueLabel('With Product')
+                    ->falseLabel('Without Product')
+                    ->label('Product'),
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
-                Impersonate::make(),
+                Impersonate::make()
+                    ->guard('web')
+                    ->redirectTo(Filament::getDefaultPanel()->getUrl()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

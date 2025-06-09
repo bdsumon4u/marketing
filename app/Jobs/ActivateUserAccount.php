@@ -16,6 +16,7 @@ class ActivateUserAccount implements ShouldQueue
      */
     public function __construct(
         protected User $user,
+        protected string $package,
     ) {}
 
     /**
@@ -23,7 +24,8 @@ class ActivateUserAccount implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->user->update(['is_active' => true]);
+        info('Activating user account', ['user' => $this->user->id, 'package' => $this->package]);
+        $this->user->update(['is_active' => true, 'with_product' => $this->package === 'with_product']);
 
         $this->calculateAndUpdateRanks($this->user->referrer);
     }
@@ -49,7 +51,7 @@ class ActivateUserAccount implements ShouldQueue
 
         $newRank = $maxRank + 1;
 
-        if ($user->rank !== $newRank) {
+        if ($user->rank->value !== $newRank) {
             $user->update(['rank' => $newRank, 'rank_updated_at' => now()]);
             $this->calculateAndUpdateRanks($user->referrer);
         }

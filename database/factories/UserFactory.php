@@ -25,7 +25,7 @@ class UserFactory extends Factory
         return $this->afterCreating(fn (User $user) => $user->update([
             'referrer_id' => fake()->optional()->numberBetween(
                 $baseId = User::baseId(),
-                min($baseId + 50, User::max('id') - 1),
+                min($baseId + 10, User::max('id') - 1),
             ),
         ]));
     }

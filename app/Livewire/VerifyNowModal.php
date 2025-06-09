@@ -76,7 +76,7 @@ class VerifyNowModal extends Component implements HasForms
             new ProcessCompanyFund($user, $data['package']),
             new ProcessReferralIncentive($user, $data['package']),
             new ProcessMagicIncome($user, $data['package']),
-            new ActivateUserAccount($user),
+            new ActivateUserAccount($user, $data['package']),
         ])->dispatch();
 
         Notification::make()

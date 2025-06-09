@@ -26,6 +26,7 @@ class ProcessRegistrationFee implements ShouldQueue
      */
     public function handle(): void
     {
+        info('Processing registration fee', ['user' => $this->user->id, 'package' => $this->package]);
         if ($this->user->balanceFloat < Arr::get(config('mlm.registration_fee'), $this->package)) {
             throw new \Exception('Insufficient balance');
         }

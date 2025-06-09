@@ -7,5 +7,5 @@ Route::get('/', function () {
 });
 
 Route::get('/binary-tree', function () {
-    return view('binary-tree');
+    phpinfo();
 })->name('binary-tree');
