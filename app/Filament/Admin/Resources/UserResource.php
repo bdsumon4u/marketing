@@ -43,10 +43,12 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Status')
-                    ->boolean(),
+                    ->boolean()
+                    ->alignCenter(),
                 Tables\Columns\IconColumn::make('with_product')
                     ->label('Product')
-                    ->boolean(),
+                    ->boolean()
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('rank')
                     ->label('Rank')
                     ->searchable()

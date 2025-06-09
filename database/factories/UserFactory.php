@@ -27,14 +27,14 @@ class UserFactory extends Factory
             $baseId = User::baseId();
             $maxReferrals = $rankThreshold + 2;
 
-            // Get the 2 most recent users who have reached the rank threshold
+            // Get the n most recent users who have reached the rank threshold
             $qualifiedReferrers = User::whereHas('referrals', function ($query) {}, '>=', $rankThreshold)
                 ->latest()
-                ->take(2)
+                ->take($rankThreshold)
                 ->get();
 
-            if ($qualifiedReferrers->count() === 2) {
-                // Get all referrals of these 2 most recent qualified users
+            if ($qualifiedReferrers->count() === $rankThreshold) {
+                // Get all referrals of these n most recent qualified users
                 // but only include users who haven't reached max referrals
                 $referralIds = $qualifiedReferrers->flatMap(function ($user) use ($maxReferrals) {
                     return $user->referrals()
