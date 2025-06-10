@@ -22,7 +22,7 @@
         <div class="font-medium">Payment Method</div>
         <p class="mt-1">Please send money via bKash personal:</p>
         <ul class="mt-2 list-disc list-inside">
-            <li>Account: <span class="font-mono">01789009870</span></li>
+            <li>Account: <span class="font-mono">{{ config('mlm.bkash_number') }}</span></li>
             <li>Reference: <span class="font-mono">{{ auth()->user()->username }}</span></li>
         </ul>
     </div>
