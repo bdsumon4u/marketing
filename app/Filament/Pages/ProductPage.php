@@ -3,21 +3,20 @@
 namespace App\Filament\Pages;
 
 use App\Models\User;
-use Bavix\Wallet\Models\Transaction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Number;
 
 class ProductPage extends Page implements HasForms, HasTable
 {
@@ -42,9 +41,11 @@ class ProductPage extends Page implements HasForms, HasTable
         return $form
             ->schema([
                 TextInput::make('amount')
-                    ->numeric()
+                    ->label('Amount')
                     ->required()
-                    ->minValue(1),
+                    ->numeric()
+                    ->minValue(1)
+                    ->prefix(Number::defaultCurrency()),
                 TextInput::make('message')
                     ->required(),
                 TextInput::make('reference')
@@ -60,10 +61,9 @@ class ProductPage extends Page implements HasForms, HasTable
                 $user = value(fn (): User => Filament::auth()->user());
                 $wallet = $user->getOrCreateWallet('product');
 
-                return $wallet->walletTransactions()->getQuery();
+                return $wallet->walletTransactions()->getQuery()->with('wallet');
             })
             ->columns([
-                TextColumn::make('id'),
                 TextColumn::make('type')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -74,7 +74,8 @@ class ProductPage extends Page implements HasForms, HasTable
                 TextColumn::make('amountFloat')
                     ->label('Amount')
                     ->money()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => Number::currency(abs($state))),
                 TextColumn::make('meta.message')
                     ->label('Message')
                     ->searchable(),
@@ -88,34 +89,48 @@ class ProductPage extends Page implements HasForms, HasTable
                     ))
                     ->sortable(),
             ])
-            ->defaultSort('created_at', 'desc');
-    }
+            ->defaultSort('created_at', 'desc')
+            ->headerActions([
+                Action::make('create')
+                    ->label('Add Transaction')
+                    ->icon('heroicon-m-plus')
+                    ->slideOver()
+                    ->modalWidth('sm')
+                    ->form([
+                        TextInput::make('amount')
+                            ->label('Amount')
+                            ->required()
+                            ->numeric()
+                            ->minValue(1)
+                            ->prefix(Number::defaultCurrency()),
+                        TextInput::make('message')
+                            ->required(),
+                        TextInput::make('reference')
+                            ->required(),
+                    ])
+                    ->action(function (array $data): void {
+                        $user = value(fn (): User => Filament::auth()->user());
+                        $wallet = $user->getOrCreateWallet('product');
 
-    public function create(): void
-    {
-        $data = $this->form->getState();
-        $user = value(fn (): User => Filament::auth()->user());
-        $wallet = $user->getOrCreateWallet('product');
+                        if ($wallet->balanceFloat < $data['amount']) {
+                            Notification::make()
+                                ->title('Insufficient balance')
+                                ->danger()
+                                ->send();
 
-        if ($wallet->balanceFloat < $data['amount']) {
-            Notification::make()
-                ->title('Insufficient balance')
-                ->danger()
-                ->send();
+                            return;
+                        }
 
-            return;
-        }
+                        $wallet->withdrawFloat($data['amount'], [
+                            'message' => $data['message'],
+                            'reference' => $data['reference'],
+                        ]);
 
-        $wallet->withdrawFloat($data['amount'], [
-            'description' => $data['description'],
-            'reference' => $data['reference'],
-        ]);
-
-        Notification::make()
-            ->title('Transaction added successfully')
-            ->success()
-            ->send();
-
-        $this->form->fill();
+                        Notification::make()
+                            ->title('Transaction added successfully')
+                            ->success()
+                            ->send();
+                    }),
+            ]);
     }
 }

@@ -32,8 +32,11 @@ class TransferResource extends Resource
                     ->exists('users', 'username')
                     ->required(),
                 Forms\Components\TextInput::make('amount')
-                    ->prefix(Number::defaultCurrency())
-                    ->required(),
+                    ->label('Amount')
+                    ->required()
+                    ->numeric()
+                    ->minValue(1)
+                    ->prefix(Number::defaultCurrency()),
             ])
             ->columns(1);
     }

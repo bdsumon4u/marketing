@@ -91,7 +91,11 @@ class DepositResource extends Resource
                     ->form([
                         Forms\Components\TextInput::make('amount')
                             ->label('Amount')
+                            ->required()
+                            ->numeric()
+                            ->minValue(1)
                             ->formatStateUsing(fn (Transaction $record): string => $record->amountFloat)
+                            ->prefix(Number::defaultCurrency())
                             ->disabled(),
                         Forms\Components\TextInput::make('reference')
                             ->label('Reference')

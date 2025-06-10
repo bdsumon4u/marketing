@@ -34,7 +34,7 @@ class WithdrawResource extends Resource
                     ->label('Amount')
                     ->required()
                     ->numeric()
-                    ->minValue(0)
+                    ->minValue(1)
                     ->formatStateUsing(fn ($state) => abs($state))
                     ->prefix(Number::defaultCurrency()),
                 PhoneInput::make('bkash_number')
