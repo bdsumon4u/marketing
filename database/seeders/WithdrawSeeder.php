@@ -57,9 +57,9 @@ class WithdrawSeeder extends Seeder
             Carbon::setTestNow($currentDate);
 
             $user = $users->random();
-            $balance = (int)$user->getOrCreateWallet('earning')->balanceFloat;
+            $balance = (int) $user->getOrCreateWallet('earning')->balanceFloat;
             $amount = mt_rand(500, max(500, min(2000, $balance)));
-            $withdraw = new ListWithdraws()->processWithdraw([
+            $withdraw = (new ListWithdraws)->processWithdraw([
                 'amount' => $amount,
                 'bkash_number' => $user->phone,
             ], null, $user);

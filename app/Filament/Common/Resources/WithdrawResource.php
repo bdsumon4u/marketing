@@ -54,6 +54,10 @@ class WithdrawResource extends Resource
             ->modifyQueryUsing(function (Builder $query) {
                 return $query
                     ->where('type', Transaction::TYPE_WITHDRAW)
+                    ->where('payable_type', User::class)
+                    ->when(Filament::getCurrentPanel()->getId() === 'app', function ($query) {
+                        $query->where('payable_id', Filament::auth()->id());
+                    })
                     ->where('meta->action', 'withdraw')
                     ->whereRelation('wallet', 'slug', 'earning')
                     ->with('wallet');

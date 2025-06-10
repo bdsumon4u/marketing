@@ -5,8 +5,6 @@ namespace Database\Seeders;
 use App\Livewire\AddFundModal;
 use App\Livewire\VerifyNowModal;
 use App\Models\User;
-use Carbon\CarbonImmutable;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
@@ -79,7 +77,7 @@ class UserSeeder extends Seeder
         $amount = mt_rand(500, 2500);
 
         // Simulate deposit process using Livewire
-        $deposit = new AddFundModal()->processDeposit($user, [
+        $deposit = (new AddFundModal)->processDeposit($user, [
             'amount' => $amount,
             'transaction_id' => 'TRX'.str_pad($index, 6, '0', STR_PAD_LEFT),
         ]);
@@ -132,6 +130,7 @@ class UserSeeder extends Seeder
         // Leave 1% unverified
         if (rand(1, 100) <= 1) {
             $this->stats['unverified']++;
+
             return;
         }
 
@@ -147,7 +146,7 @@ class UserSeeder extends Seeder
         $package = $withProduct ? 'with_product' : 'without_product';
 
         // Process jobs synchronously to maintain time sequence
-        $verifyModal = new VerifyNowModal();
+        $verifyModal = new VerifyNowModal;
         $verifyModal->verifyUser($user, ['package' => $package]);
 
         $this->stats[$package]++;

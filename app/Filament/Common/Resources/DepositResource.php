@@ -41,6 +41,9 @@ class DepositResource extends Resource
                 return $query
                     ->where('type', Transaction::TYPE_DEPOSIT)
                     ->where('payable_type', User::class)
+                    ->when(Filament::getCurrentPanel()->getId() === 'app', function ($query) {
+                        $query->where('payable_id', Filament::auth()->id());
+                    })
                     ->where('meta->action', 'deposit')
                     ->whereRelation('wallet', 'slug', 'default')
                     ->with(['payable', 'wallet']);

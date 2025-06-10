@@ -3,10 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Enums\UserRank;
+use App\Jobs\DistributeSpecialFunds as DistributeSpecialFundsJob;
 use App\Models\User;
-use App\Models\Wallet;
 use Illuminate\Console\Command;
-use Illuminate\Support\Number;
 
 class DistributeSpecialFunds extends Command
 {
@@ -15,7 +14,7 @@ class DistributeSpecialFunds extends Command
      *
      * @var string
      */
-    protected $signature = 'app:distribute-special-funds';
+    protected $signature = 'app:distribute-special-funds {month? : The month to distribute funds for (format: YYYY-MM)}';
 
     /**
      * The console command description.
@@ -29,31 +28,28 @@ class DistributeSpecialFunds extends Command
      */
     public function handle()
     {
-        $users = User::query()
+        $month = $this->argument('month') ?? now()->subMonth()->format('Y-m');
+
+        $usersByRank = User::query()
             ->where('rank', '>=', UserRank::_M->value)
-            ->where('rank_updated_at', '>=', now()->subMonth()->startOfMonth())
-            ->where('rank_updated_at', '<=', now()->subMonth()->endOfMonth())
+            ->where('rank_updated_at', '>=', now()->parse($month)->startOfMonth())
+            ->where('rank_updated_at', '<=', now()->parse($month)->endOfMonth())
             ->get()
             ->groupBy('rank');
 
-        $this->info('Distributing special funds to ' . $users->count() . ' users...');
+        $this->info('Found '.$usersByRank->count().' ranks to distribute funds for '.$month);
 
-        foreach ($users as $rank => $users) {
+        foreach ($usersByRank as $rank => $users) {
             $rank = UserRank::from($rank);
-            $this->info('Users: '.$users->count().' has rank: '.$rank->name);
-            $wallet = Wallet::company()->getWallet($rank->getWalletSlug());
-            $amountPerUser = $wallet->balanceFloat / count($users);
-            $this->info('Amount per user: '.Number::currency($amountPerUser));
-            foreach ($users as $user) {
-                $wallet->transferFloat($user->getOrCreateWallet('earning'), $amountPerUser, [
-                    'action' => 'income',
-                    'type' => 'special',
-                    'description' => 'Rank fund distribution',
-                    'reference' => $rank->getWalletSlug(),
-                ]);
-                $this->info('Transferred '.Number::currency($amountPerUser).' to '.$user->username);
+            $this->info($users->count().' users has rank: '.$rank->name);
+        }
+
+        if ($this->confirm('Do you want to proceed with distribution?')) {
+            foreach ($usersByRank as $rank => $users) {
+                $rank = UserRank::from($rank);
+                DistributeSpecialFundsJob::dispatch($users, $rank, $month);
+                $this->info('Distribution job has been queued for rank '.$rank->name.' for '.$month);
             }
-            $this->info('--------------------------------');
         }
     }
 }

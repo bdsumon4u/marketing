@@ -10,7 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
 class UserResource extends Resource
 {
@@ -85,9 +84,6 @@ class UserResource extends Resource
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
-                Impersonate::make()
-                    ->guard('web')
-                    ->redirectTo(Filament::getDefaultPanel()->getUrl()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

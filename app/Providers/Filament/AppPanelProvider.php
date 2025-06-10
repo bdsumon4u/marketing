@@ -89,8 +89,8 @@ class AppPanelProvider extends PanelProvider
                         <x-filament::badge
                             color="primary"
                             title="'.value(fn (): User => Filament::auth()->user())->rank_updated_at->format(
-                                Table::$defaultDateTimeDisplayFormat,
-                            ).'"
+                    Table::$defaultDateTimeDisplayFormat,
+                ).'"
                         >
                             '.value(fn (): User => Filament::auth()->user())->rank->name.'
                         </x-filament::badge>
