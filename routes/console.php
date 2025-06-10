@@ -9,4 +9,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command(DistributeSpecialFunds::class)->monthly();
+Schedule::command(DistributeSpecialFunds::class)
+    ->monthly()
+    ->at('00:01')
+    ->withoutOverlapping()
+    ->runInBackground();
