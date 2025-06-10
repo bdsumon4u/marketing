@@ -16,6 +16,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Tables\Table;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -85,7 +86,12 @@ class AppPanelProvider extends PanelProvider
                 fn () => Blade::render('
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-semibold text-gray-500">Rank:</span>
-                        <x-filament::badge color="primary">
+                        <x-filament::badge
+                            color="primary"
+                            title="'.value(fn (): User => Filament::auth()->user())->rank_updated_at->format(
+                                Table::$defaultDateTimeDisplayFormat,
+                            ).'"
+                        >
                             '.value(fn (): User => Filament::auth()->user())->rank->name.'
                         </x-filament::badge>
                     </div>
