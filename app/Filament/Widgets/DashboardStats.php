@@ -9,7 +9,7 @@ class DashboardStats extends Widget
 {
     use CanPoll;
 
-    protected static string $view = 'filament.widgets.dashboard-stats';
+    protected string $view = 'filament.widgets.dashboard-stats';
 
     protected int|string|array $columnSpan = 'full';
 

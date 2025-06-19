@@ -26,7 +26,7 @@ class ReferralTreeNode extends Component
     public function render()
     {
         return view('livewire.referral-tree-node', [
-            'panelId' => Filament::getCurrentPanel()->getId(),
+            'panelId' => Filament::getCurrentOrDefaultPanel()->getId(),
         ]);
     }
 }

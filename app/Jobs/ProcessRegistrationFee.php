@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Exception;
 use App\Enums\CompanyWalletType;
 use App\Models\User;
 use App\Models\Wallet;
@@ -28,7 +29,7 @@ class ProcessRegistrationFee implements ShouldQueue
     {
         info('Processing registration fee', ['user' => $this->user->id, 'package' => $this->package]);
         if ($this->user->balanceFloat < Arr::get(config('mlm.registration_fee'), $this->package)) {
-            throw new \Exception('Insufficient balance');
+            throw new Exception('Insufficient balance');
         }
 
         $registrationFee = config('mlm.registration_fee.without_product');

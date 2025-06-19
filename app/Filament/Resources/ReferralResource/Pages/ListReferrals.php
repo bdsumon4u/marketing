@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ReferralResource\Pages;
 
+use Filament\Actions\Action;
 use App\Filament\Resources\ReferralResource;
 use Filament\Actions;
 use Filament\Facades\Filament;
@@ -16,7 +17,7 @@ class ListReferrals extends ListRecords
     {
         return [
             // Actions\CreateAction::make(),
-            Actions\Action::make('copy-link')
+            Action::make('copy-link')
                 ->label('Copy Link')
                 ->icon('heroicon-o-link')
                 ->color('success')
@@ -47,7 +48,7 @@ class ListReferrals extends ListRecords
 
     public function getReferralLink(): string
     {
-        return Filament::getPanel()->getRegistrationUrl([
+        return Filament::getCurrentOrDefaultPanel()->getRegistrationUrl([
             'ref' => Filament::auth()->user()->username,
         ]);
     }

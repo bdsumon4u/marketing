@@ -3,12 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\IncomeResource\Pages;
+use App\Filament\Resources\IncomeResource\Pages\ListIncomes;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Facades\Filament;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
@@ -19,12 +22,12 @@ class IncomeResource extends Resource
 
     protected static ?string $modelLabel = 'Income';
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-trending-up';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-trending-up';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 //
             ]);
     }
@@ -43,32 +46,32 @@ class IncomeResource extends Resource
                     ->with(['payable', 'wallet']);
             })
             ->columns([
-                Tables\Columns\TextColumn::make('meta.message')
+                TextColumn::make('meta.message')
                     ->label('Message')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amountFloat')
+                TextColumn::make('amountFloat')
                     ->label('Amount')
                     ->formatStateUsing(function (Transaction $record): string {
                         return Number::currency(abs($record->amountFloat));
                     }),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Date')
                     ->date()
                     ->tooltip(function (Transaction $record): string {
                         return $record->created_at->format(
-                            Table::$defaultTimeDisplayFormat,
+                            config('app.time_format'),
                         );
                     }),
             ])
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -84,7 +87,7 @@ class IncomeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListIncomes::route('/'),
+            'index' => ListIncomes::route('/'),
             // 'create' => Pages\CreateIncome::route('/create'),
             // 'edit' => Pages\EditIncome::route('/{record}/edit'),
         ];

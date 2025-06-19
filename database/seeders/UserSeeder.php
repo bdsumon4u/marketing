@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRank;
 use App\Livewire\AddFundModal;
 use App\Livewire\VerifyNowModal;
 use App\Models\User;
@@ -167,7 +168,7 @@ class UserSeeder extends Seeder
 
     protected function calculateAndUpdateRanks(?User $user): void
     {
-        if (! $user || $user->rank === \App\Enums\UserRank::getMaximumRank()) {
+        if (! $user || $user->rank === UserRank::getMaximumRank()) {
             return;
         }
 

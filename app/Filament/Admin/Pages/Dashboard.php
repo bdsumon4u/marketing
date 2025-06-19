@@ -9,7 +9,7 @@ use Livewire\Attributes\Computed;
 
 class Dashboard extends DashboardPage
 {
-    protected static string $view = 'filament.admin.pages.dashboard';
+    protected string $view = 'filament.admin.pages.dashboard';
 
     #[Computed(true)]
     public function totalDeposit(): float

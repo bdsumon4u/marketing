@@ -3,14 +3,14 @@
 namespace App\Filament\Pages;
 
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Tables\Actions\Action;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -23,9 +23,9 @@ class ProductPage extends Page implements HasForms, HasTable
     use InteractsWithForms;
     use InteractsWithTable;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string $view = 'filament.pages.product-page';
+    protected string $view = 'filament.pages.product-page';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -36,10 +36,10 @@ class ProductPage extends Page implements HasForms, HasTable
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('amount')
                     ->label('Amount')
                     ->required()
@@ -85,7 +85,7 @@ class ProductPage extends Page implements HasForms, HasTable
                 TextColumn::make('created_at')
                     ->date()
                     ->tooltip(fn ($state) => $state->format(
-                        Table::$defaultTimeDisplayFormat,
+                        config('app.time_format'),
                     ))
                     ->sortable(),
             ])
@@ -96,7 +96,7 @@ class ProductPage extends Page implements HasForms, HasTable
                     ->icon('heroicon-m-plus')
                     ->slideOver()
                     ->modalWidth('sm')
-                    ->form([
+                    ->schema([
                         TextInput::make('amount')
                             ->label('Amount')
                             ->required()

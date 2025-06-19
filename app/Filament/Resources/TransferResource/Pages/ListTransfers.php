@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\TransferResource\Pages;
 
+use Filament\Actions\CreateAction;
+use Filament\Actions\Action;
 use App\Filament\Resources\TransferResource;
 use App\Models\User;
 use Filament\Actions;
@@ -17,19 +19,19 @@ class ListTransfers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->label('Send Money')
                 ->slideOver()
                 ->modalWidth('md')
                 ->modalHeading('Send Money')
                 ->modalSubmitActionLabel('Send')
-                ->extraModalFooterActions(function (Actions\Action $action) {
+                ->extraModalFooterActions(function (Action $action) {
                     return $action->canCreateAnother() ? [
                         $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                             ->label('Send and send another'),
                     ] : [];
                 })
-                ->using(function (array $data, Actions\Action $action) {
+                ->using(function (array $data, Action $action) {
                     $sender = value(fn (): User => Filament::auth()->user());
 
                     if ($sender->balanceFloat < $data['amount']) {

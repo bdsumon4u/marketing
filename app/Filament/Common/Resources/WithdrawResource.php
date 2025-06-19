@@ -3,16 +3,22 @@
 namespace App\Filament\Common\Resources;
 
 use App\Filament\Common\Resources\WithdrawResource\Pages;
+use App\Filament\Common\Resources\WithdrawResource\Pages\ListWithdraws;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
@@ -24,25 +30,28 @@ class WithdrawResource extends Resource
 
     protected static ?string $modelLabel = 'Withdraw';
 
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('amount')
+        return $schema
+            ->components([
+                TextInput::make('amount')
                     ->label('Amount')
                     ->required()
                     ->numeric()
                     ->minValue(1)
                     ->formatStateUsing(fn ($state) => abs($state))
                     ->prefix(Number::defaultCurrency()),
-                PhoneInput::make('bkash_number')
+                TextInput::make('bkash_number')
                     ->label('bKash Number')
                     ->required()
-                    ->disallowDropdown()
-                    ->defaultCountry('BD')
-                    ->initialCountry('BD'),
+                    // ->disallowDropdown()
+                    // ->defaultCountry('BD')
+                    // ->initialCountry('BD')
+                    ->prefixIcon('heroicon-o-phone')
+                    ->placeholder('01XXXXXXXXX')
+                    ->numeric(),
             ])
             ->columns(1);
     }
@@ -55,7 +64,7 @@ class WithdrawResource extends Resource
                 return $query
                     ->where('type', Transaction::TYPE_WITHDRAW)
                     ->where('payable_type', User::class)
-                    ->when(Filament::getCurrentPanel()->getId() === 'app', function ($query) {
+                    ->when(Filament::getCurrentOrDefaultPanel()->getId() === 'app', function ($query) {
                         $query->where('payable_id', Filament::auth()->id());
                     })
                     ->where('meta->action', 'withdraw')
@@ -63,57 +72,57 @@ class WithdrawResource extends Resource
                     ->with('wallet');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Date')
                     ->date()
                     ->tooltip(function (Transaction $record): string {
                         return $record->created_at->format(
-                            Table::$defaultTimeDisplayFormat,
+                            config('app.time_format'),
                         );
                     }),
-                Tables\Columns\TextColumn::make('payable.username')
+                TextColumn::make('payable.username')
                     ->tooltip(fn (Transaction $record): string => $record->payable->name)
                     ->label('User')
                     ->searchable()
                     ->sortable()
-                    ->visible(fn () => Filament::getCurrentPanel()->getId() === 'admin'),
-                Tables\Columns\TextColumn::make('amountFloat')
+                    ->visible(fn () => Filament::getCurrentOrDefaultPanel()->getId() === 'admin'),
+                TextColumn::make('amountFloat')
                     ->label('Amount')
                     ->formatStateUsing(function (Transaction $record): string {
                         return Number::currency(abs($record->amountFloat));
                     })
                     ->tooltip(fn (Transaction $record): string => $record->meta['transaction_id'] ?? ''),
-                Tables\Columns\TextColumn::make('meta.message')
+                TextColumn::make('meta.message')
                     ->label('Message')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('confirmed')
+                IconColumn::make('confirmed')
                     ->boolean()
                     ->alignCenter()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('confirmed')
+                TernaryFilter::make('confirmed')
                     ->trueLabel('Confirmed')
                     ->falseLabel('Pending')
                     ->label('Status'),
             ])
-            ->actions([
-                Tables\Actions\Action::make('review')
+            ->recordActions([
+                Action::make('review')
                     ->slideOver()
                     ->icon('heroicon-o-eye')
                     ->color('success')
-                    ->visible(fn (Transaction $record): bool => Filament::getCurrentPanel()->getId() === 'admin' && ! $record->confirmed)
-                    ->form([
-                        Forms\Components\TextInput::make('amountFloat')
+                    ->visible(fn (Transaction $record): bool => Filament::getCurrentOrDefaultPanel()->getId() === 'admin' && ! $record->confirmed)
+                    ->schema([
+                        TextInput::make('amountFloat')
                             ->label('Amount')
                             ->formatStateUsing(fn (Transaction $record): string => Number::currency(abs($record->amountFloat)))
                             ->disabled(),
-                        Forms\Components\TextInput::make('bkash_number')
+                        TextInput::make('bkash_number')
                             ->label('bKash Number')
                             ->formatStateUsing(fn (Transaction $record): string => $record->meta['bkash_number'] ?? '')
                             ->disabled(),
-                        Forms\Components\TextInput::make('transaction_id')
+                        TextInput::make('transaction_id')
                             ->label('Transaction ID')
                             ->formatStateUsing(fn (Transaction $record): string => $record->meta['transaction_id'] ?? '')
                             ->required(),
@@ -176,10 +185,10 @@ class WithdrawResource extends Resource
                     ->modalHeading('Confirm Transaction')
                     ->modalDescription('Are you sure you want to confirm this transaction?')
                     ->modalSubmitActionLabel('Yes, confirm'),
-                Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->icon('heroicon-o-eye')
                     ->color('success')
-                    ->infolist([
+                    ->schema([
                         TextEntry::make('payable.name')
                             ->label('User')
                             ->helperText(fn (Transaction $record): string => $record->payable->username),
@@ -190,7 +199,7 @@ class WithdrawResource extends Resource
                             ->label('Date')
                             ->date()
                             ->helperText(fn (Transaction $record): string => $record->created_at->format(
-                                Table::$defaultTimeDisplayFormat,
+                                config('app.time_format'),
                             )),
                         TextEntry::make('meta.transaction_id')
                             ->label('Transaction ID'),
@@ -198,8 +207,8 @@ class WithdrawResource extends Resource
                             ->label('bKash Number'),
                     ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -215,7 +224,7 @@ class WithdrawResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListWithdraws::route('/'),
+            'index' => ListWithdraws::route('/'),
             // 'create' => Pages\CreateWithdraw::route('/create'),
             // 'edit' => Pages\EditWithdraw::route('/{record}/edit'),
         ];

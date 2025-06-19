@@ -3,11 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReferralResource\Pages;
+use App\Filament\Resources\ReferralResource\Pages\ListReferrals;
 use App\Models\User;
+use Filament\Actions\BulkActionGroup;
 use Filament\Facades\Filament;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -15,14 +19,14 @@ class ReferralResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-paper-airplane';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-paper-airplane';
 
     protected static ?string $modelLabel = 'Referral';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 //
             ]);
     }
@@ -32,39 +36,39 @@ class ReferralResource extends Resource
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->where('referrer_id', Filament::auth()->id()))
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('phone')
+                TextColumn::make('phone')
                     ->label('Phone')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('rank')
+                TextColumn::make('rank')
                     ->label('Rank')
                     ->badge()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Joined')
                     ->date()
                     ->tooltip(fn (User $record) => $record->created_at->format(
-                        Table::$defaultTimeDisplayFormat
+                        config('app.time_format')
                     ))
                     ->sortable(),
             ])
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -80,7 +84,7 @@ class ReferralResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListReferrals::route('/'),
+            'index' => ListReferrals::route('/'),
             // 'create' => Pages\CreateReferral::route('/create'),
             // 'edit' => Pages\EditReferral::route('/{record}/edit'),
         ];

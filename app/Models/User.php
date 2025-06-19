@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-
+use Database\Factories\UserFactory;
 use App\Casts\Money;
 use App\Enums\UserRank;
 use Bavix\Wallet\Interfaces\Confirmable;
@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
 
 class User extends Authenticatable implements Confirmable, FilamentUser, /* MustVerifyEmail, */ WalletFloatInterface, WalletInterface
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use CanConfirm, HasFactory, HasWalletFloat, HasWallets, Notifiable;
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Common\Resources\WithdrawResource\Pages;
 
+use Filament\Actions\DeleteAction;
 use App\Filament\Common\Resources\WithdrawResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -13,7 +14,7 @@ class EditWithdraw extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

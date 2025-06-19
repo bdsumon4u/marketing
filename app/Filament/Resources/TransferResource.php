@@ -3,13 +3,16 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransferResource\Pages;
+use App\Filament\Resources\TransferResource\Pages\ListTransfers;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Facades\Filament;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
@@ -20,18 +23,18 @@ class TransferResource extends Resource
 
     protected static ?string $modelLabel = 'Transfer';
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrows-right-left';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('transfer_to')
+        return $schema
+            ->components([
+                TextInput::make('transfer_to')
                     ->validationAttribute('username')
                     ->label('Transfer To (username)')
                     ->exists('users', 'username')
                     ->required(),
-                Forms\Components\TextInput::make('amount')
+                TextInput::make('amount')
                     ->label('Amount')
                     ->required()
                     ->numeric()
@@ -54,7 +57,7 @@ class TransferResource extends Resource
                     ->with('payable', 'wallet');
             })
             ->columns([
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label('Type')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -67,35 +70,35 @@ class TransferResource extends Resource
                         Transaction::TYPE_WITHDRAW => 'Debit',
                         default => 'Unknown',
                     }),
-                Tables\Columns\TextColumn::make('payable.username')
+                TextColumn::make('payable.username')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amountFloat')
+                TextColumn::make('amountFloat')
                     ->label('Amount')
                     ->formatStateUsing(function (Transaction $record): string {
                         return Number::currency(abs($record->amountFloat));
                     }),
-                Tables\Columns\TextColumn::make('meta.message')
+                TextColumn::make('meta.message')
                     ->label('Message')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Date')
                     ->date()
                     ->tooltip(function (Transaction $record): string {
                         return $record->created_at->format(
-                            Table::$defaultTimeDisplayFormat,
+                            config('app.time_format'),
                         );
                     }),
             ])
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -111,7 +114,7 @@ class TransferResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTransfers::route('/'),
+            'index' => ListTransfers::route('/'),
             // 'create' => Pages\CreateTransfer::route('/create'),
             // 'edit' => Pages\EditTransfer::route('/{record}/edit'),
         ];

@@ -9,7 +9,7 @@ use Filament\Widgets\Widget;
 
 class ReferralLink extends Widget
 {
-    protected static string $view = 'filament.widgets.referral-link';
+    protected string $view = 'filament.widgets.referral-link';
 
     protected int|string|array $columnSpan = 'full';
 
@@ -20,7 +20,7 @@ class ReferralLink extends Widget
 
     public function getReferralLink(): string
     {
-        return Filament::getPanel()->getRegistrationUrl([
+        return Filament::getCurrentOrDefaultPanel()->getRegistrationUrl([
             'ref' => $this->user()->username,
         ]);
     }

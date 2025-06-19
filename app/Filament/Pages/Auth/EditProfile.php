@@ -2,13 +2,13 @@
 
 namespace App\Filament\Pages\Auth;
 
+use Filament\Forms\Components\TextInput;
 use Filament\Forms;
-use Filament\Pages\Auth\EditProfile as BaseEditProfile;
 
 /**
  * @property Form $form
  */
-class EditProfile extends BaseEditProfile
+class EditProfile extends \Filament\Auth\Pages\EditProfile
 {
     /**
      * @return array<int | string, string | Form>
@@ -18,15 +18,15 @@ class EditProfile extends BaseEditProfile
         return [
             'form' => $this->form(
                 $this->makeForm()
-                    ->schema([
+                    ->components([
                         $this->getNameFormComponent(),
-                        Forms\Components\TextInput::make('username')
+                        TextInput::make('username')
                             ->label(__('Username'))
                             ->required()
                             ->maxLength(255)
                             ->autofocus(),
                         $this->getEmailFormComponent(),
-                        Forms\Components\TextInput::make('phone')
+                        TextInput::make('phone')
                             ->label(__('Phone'))
                             ->required()
                             ->maxLength(255),

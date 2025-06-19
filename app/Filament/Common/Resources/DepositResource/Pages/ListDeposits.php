@@ -2,6 +2,7 @@
 
 namespace App\Filament\Common\Resources\DepositResource\Pages;
 
+use Filament\Actions\Action;
 use App\Filament\Common\Resources\DepositResource;
 use Filament\Actions;
 use Filament\Facades\Filament;
@@ -14,11 +15,11 @@ class ListDeposits extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('addFund')
+            Action::make('addFund')
                 ->label('Add Funds')
                 ->icon('heroicon-o-plus')
                 ->action(fn () => $this->dispatch('open-modal', id: 'add-fund-modal'))
-                ->visible(fn () => Filament::getCurrentPanel()->getId() === 'app'),
+                ->visible(fn () => Filament::getCurrentOrDefaultPanel()->getId() === 'app'),
         ];
     }
 }

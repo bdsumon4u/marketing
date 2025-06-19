@@ -26,7 +26,7 @@ class TreeNode extends Component
     public function render()
     {
         return view('livewire.tree-node', [
-            'panelId' => Filament::getCurrentPanel()->getId(),
+            'panelId' => Filament::getCurrentOrDefaultPanel()->getId(),
         ]);
     }
 }

@@ -4,23 +4,28 @@ namespace App\Filament\Admin\Resources;
 
 use App\Enums\UserRank;
 use App\Filament\Admin\Resources\UserResource\Pages;
+use App\Filament\Admin\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
-use Filament\Facades\Filament;
-use Filament\Forms\Form;
+use Filament\Actions\BulkActionGroup;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 //
             ]);
     }
@@ -29,64 +34,64 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Name')
                     ->searchable()
                     ->sortable()
                     ->tooltip(fn (User $record): string => $record->username),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('phone')
+                TextColumn::make('phone')
                     ->label('Phone')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label('Status')
                     ->boolean()
                     ->alignCenter(),
-                Tables\Columns\IconColumn::make('with_product')
+                IconColumn::make('with_product')
                     ->label('Product')
                     ->boolean()
                     ->alignCenter(),
-                Tables\Columns\TextColumn::make('rank')
+                TextColumn::make('rank')
                     ->label('Rank')
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->tooltip(fn (User $record): string => $record->rank_updated_at->format(
-                        Table::$defaultDateTimeDisplayFormat,
+                        config('app.datetime_format'),
                     )),
-                Tables\Columns\TextColumn::make('total_deposit')
+                TextColumn::make('total_deposit')
                     ->label('Total Deposit')
                     ->money()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total_withdraw')
+                TextColumn::make('total_withdraw')
                     ->label('Total Withdraw')
                     ->money()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total_income')
+                TextColumn::make('total_income')
                     ->label('Total Income')
                     ->money()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('rank')
+                SelectFilter::make('rank')
                     ->options(UserRank::class)
                     ->label('Rank'),
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->trueLabel('Active')
                     ->falseLabel('Inactive')
                     ->label('Status'),
-                Tables\Filters\TernaryFilter::make('with_product')
+                TernaryFilter::make('with_product')
                     ->trueLabel('With Product')
                     ->falseLabel('Without Product')
                     ->label('Product'),
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -102,7 +107,7 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
+            'index' => ListUsers::route('/'),
             // 'create' => Pages\CreateUser::route('/create'),
             // 'edit' => Pages\EditUser::route('/{record}/edit'),
         ];

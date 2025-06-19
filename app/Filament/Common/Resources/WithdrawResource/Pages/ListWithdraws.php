@@ -2,6 +2,8 @@
 
 namespace App\Filament\Common\Resources\WithdrawResource\Pages;
 
+use Filament\Actions\CreateAction;
+use Filament\Actions\Action;
 use App\Filament\Common\Resources\WithdrawResource;
 use App\Models\User;
 use Bavix\Wallet\Models\Transaction;
@@ -18,18 +20,18 @@ class ListWithdraws extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->slideOver()
                 ->modalWidth('md')
                 ->modalHeading('Request Withdraw')
                 ->createAnother(false)
                 ->modalSubmitActionLabel('Request')
-                ->action(fn (array $data, Actions\Action $action) => $this->processWithdraw($data, $action))
-                ->visible(fn () => Filament::getCurrentPanel()->getId() === 'app'),
+                ->action(fn (array $data, Action $action) => $this->processWithdraw($data, $action))
+                ->visible(fn () => Filament::getCurrentOrDefaultPanel()->getId() === 'app'),
         ];
     }
 
-    public function processWithdraw(array $data, ?Actions\Action $action = null, ?User $user = null): ?Transaction
+    public function processWithdraw(array $data, ?Action $action = null, ?User $user = null): ?Transaction
     {
         $user ??= value(fn (): User => Filament::auth()->user());
         $wallet = $user->getOrCreateWallet('earning');

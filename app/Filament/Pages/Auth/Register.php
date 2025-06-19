@@ -2,29 +2,32 @@
 
 namespace App\Filament\Pages\Auth;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Pages\Auth\Register as BaseRegister;
 use Illuminate\Support\Facades\DB;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
-class Register extends BaseRegister
+class Register extends \Filament\Auth\Pages\Register
 {
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 $this->getNameFormComponent(),
                 $this->getEmailFormComponent(),
-                PhoneInput::make('phone')
+                TextInput::make('phone')
                     ->label('Phone Number')
                     ->required()
-                    ->disallowDropdown()
-                    ->defaultCountry('BD')
-                    ->initialCountry('BD'),
-                Forms\Components\Grid::make(2)
+                    // ->disallowDropdown()
+                    // ->defaultCountry('BD')
+                    // ->initialCountry('BD')
+                    ->prefixIcon('heroicon-o-phone')
+                    ->placeholder('01XXXXXXXXX')
+                    ->numeric(),
+                Grid::make(2)
                     ->schema([
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),

@@ -13,6 +13,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -84,13 +85,13 @@ class AppPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 fn () => Blade::render('
-                    <div class="flex items-center gap-2">
+                    <div class="flex gap-2 items-center">
                         <span class="text-sm font-semibold text-gray-500">Rank:</span>
                         <x-filament::badge
                             color="primary"
                             title="'.value(fn (): User => Filament::auth()->user())->rank_updated_at->format(
-                    Table::$defaultDateTimeDisplayFormat,
-                ).'"
+                                config('app.datetime_format'),
+                            ).'"
                         >
                             '.value(fn (): User => Filament::auth()->user())->rank->name.'
                         </x-filament::badge>

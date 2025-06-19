@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Filament\Schemas\Schema;
 use App\Jobs\ActivateUserAccount;
 use App\Jobs\ProcessCompanyFund;
 use App\Jobs\ProcessMagicIncome;
@@ -12,7 +13,6 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
@@ -29,10 +29,10 @@ class VerifyNowModal extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Radio::make('package')
                     ->label('Select Package')
                     ->options([
