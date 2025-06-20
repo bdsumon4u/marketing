@@ -4,10 +4,16 @@ namespace App\Providers;
 
 use Carbon\CarbonImmutable;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\MorphToSelect;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput\Actions\HidePasswordAction;
 use Filament\Forms\Components\TextInput\Actions\ShowPasswordAction;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
@@ -57,5 +63,11 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Js::make('global', __DIR__ . '/../../resources/js/global.js'),
         ]);
+
+        $isMobile = preg_match('/Mobile|Android|iPhone/', (string) request()->header('User-Agent'));
+
+        foreach ([Select::class, MorphToSelect::class, DateTimePicker::class, SelectFilter::class, IsRelatedToOperator::class, SelectConstraint::class] as $class) {
+            $class::configureUsing(fn ($component) => $component->native($isMobile));
+        }
     }
 }
