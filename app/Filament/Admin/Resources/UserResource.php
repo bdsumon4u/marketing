@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Enums\UserRank;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Filament\Admin\Resources\UserResource\Pages\ListUsers;
+use App\Filament\Admin\Resources\UserResource\Pages\ProductPage;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Resources\Resource;
@@ -43,15 +44,19 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
-                    ->sortable()
-                    ->searchable()
+                    ->sortable('users.id')
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->orWhere('users.id', 'like', "%{$search}%");
+                    })
                     ->badge()
                     ->tooltip(fn (User $record): string => $record->created_at->format(
                         config('app.datetime_format'),
                     )),
                 TextColumn::make('name')
                     ->label('Name')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->orWhere('users.name', 'like', "%{$search}%");
+                    })
                     ->sortable()
                     ->tooltip(fn (User $record): string => $record->username),
                 TextColumn::make('email')
@@ -80,17 +85,17 @@ class UserResource extends Resource
                     ->label('Total Deposit')
                     ->money()
                     ->sortable()
-                    ->hidden(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total_withdraw')
                     ->label('Total Withdraw')
                     ->money()
                     ->sortable()
-                    ->hidden(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total_income')
                     ->label('Total Income')
                     ->money()
                     ->sortable()
-                    ->hidden(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('earnings')
                     ->label('Earning Balance')
                     ->money()
@@ -126,7 +131,9 @@ class UserResource extends Resource
                         return optional($record->wallets->first(function ($wallet) {
                             return $wallet->slug === 'product';
                         }))->balanceFloat ?? 0;
-                    }),
+                    })
+                    ->url(fn (User $record) => ProductPage::getUrl(['record' => $record->id]))
+                    ->badge(),
             ])
             ->filters([
                 SelectFilter::make('rank')
@@ -140,9 +147,6 @@ class UserResource extends Resource
                     ->trueLabel('With Product')
                     ->falseLabel('Without Product')
                     ->label('Product'),
-            ])
-            ->recordActions([
-                // Tables\Actions\EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -164,6 +168,7 @@ class UserResource extends Resource
             'index' => ListUsers::route('/'),
             // 'create' => Pages\CreateUser::route('/create'),
             // 'edit' => Pages\EditUser::route('/{record}/edit'),
+            'product' => ProductPage::route('/{record}/product'),
         ];
     }
 }

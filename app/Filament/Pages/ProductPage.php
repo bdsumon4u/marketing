@@ -18,9 +18,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 
-class ProductPage extends Page implements HasForms, HasTable
+class ProductPage extends Page implements HasTable
 {
-    use InteractsWithForms;
     use InteractsWithTable;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
@@ -28,31 +27,6 @@ class ProductPage extends Page implements HasForms, HasTable
     protected string $view = 'filament.pages.product-page';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    public ?array $data = [];
-
-    public function mount(): void
-    {
-        $this->form->fill();
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                TextInput::make('amount')
-                    ->label('Amount')
-                    ->required()
-                    ->numeric()
-                    ->minValue(1)
-                    ->prefix(Number::defaultCurrency()),
-                TextInput::make('message')
-                    ->required(),
-                TextInput::make('reference')
-                    ->required(),
-            ])
-            ->statePath('data');
-    }
 
     public function table(Table $table): Table
     {
@@ -89,48 +63,6 @@ class ProductPage extends Page implements HasForms, HasTable
                     ))
                     ->sortable(),
             ])
-            ->defaultSort('created_at', 'desc')
-            ->headerActions([
-                Action::make('create')
-                    ->label('Add Transaction')
-                    ->icon('heroicon-m-plus')
-                    ->slideOver()
-                    ->modalWidth('sm')
-                    ->schema([
-                        TextInput::make('amount')
-                            ->label('Amount')
-                            ->required()
-                            ->numeric()
-                            ->minValue(1)
-                            ->prefix(Number::defaultCurrency()),
-                        TextInput::make('message')
-                            ->required(),
-                        TextInput::make('reference')
-                            ->required(),
-                    ])
-                    ->action(function (array $data): void {
-                        $user = value(fn (): User => Filament::auth()->user());
-                        $wallet = $user->getOrCreateWallet('product');
-
-                        if ($wallet->balanceFloat < $data['amount']) {
-                            Notification::make()
-                                ->title('Insufficient balance')
-                                ->danger()
-                                ->send();
-
-                            return;
-                        }
-
-                        $wallet->withdrawFloat($data['amount'], [
-                            'message' => $data['message'],
-                            'reference' => $data['reference'],
-                        ]);
-
-                        Notification::make()
-                            ->title('Transaction added successfully')
-                            ->success()
-                            ->send();
-                    }),
-            ]);
+            ->defaultSort('created_at', 'desc');
     }
 }
