@@ -46,10 +46,10 @@ class AppServiceProvider extends ServiceProvider
         URL::forceHttps(app()->isProduction());
         Model::unguard();
         Number::useCurrency('BDT');
-        Table::configureUsing(fn(Table $table) => $table->defaultCurrency(Number::defaultCurrency()));
-        Table::configureUsing(fn(Table $table) => $table->defaultDateDisplayFormat('d-M-Y'));
-        Table::configureUsing(fn(Table $table) => $table->defaultTimeDisplayFormat('h:i:s A'));
-        Table::configureUsing(fn(Table $table) => $table->defaultDateTimeDisplayFormat('d-M-Y h:i:s A'));
+        Table::configureUsing(fn (Table $table) => $table->defaultCurrency(Number::defaultCurrency()));
+        Table::configureUsing(fn (Table $table) => $table->defaultDateDisplayFormat('d-M-Y'));
+        Table::configureUsing(fn (Table $table) => $table->defaultTimeDisplayFormat('h:i:s A'));
+        Table::configureUsing(fn (Table $table) => $table->defaultDateTimeDisplayFormat('d-M-Y h:i:s A'));
 
         // CreateAction::configureUsing(fn (CreateAction $action) => $action->icon('heroicon-o-plus'));
         DeleteAction::configureUsing(fn (DeleteAction $action) => $action->icon('heroicon-o-trash'));
@@ -62,7 +62,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         FilamentAsset::register([
-            Js::make('global', __DIR__ . '/../../resources/js/global.js'),
+            Js::make('global', __DIR__.'/../../resources/js/global.js'),
         ]);
 
         $isMobile = preg_match('/Mobile|Android|iPhone/', (string) request()->header('User-Agent'));

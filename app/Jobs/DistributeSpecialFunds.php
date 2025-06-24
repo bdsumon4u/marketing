@@ -36,7 +36,7 @@ class DistributeSpecialFunds implements ShouldQueue
             $wallet->transferFloat($user->getOrCreateWallet('earning'), $amountPerUser, [
                 'action' => 'income',
                 'type' => 'special',
-                'message' => $this->rank->name . ' rank fund distribution',
+                'message' => $this->rank->name.' rank fund distribution',
             ]);
             $user->increment('rank_income', $amountPerUser * 100);
             $user->increment('total_income', $amountPerUser * 100);

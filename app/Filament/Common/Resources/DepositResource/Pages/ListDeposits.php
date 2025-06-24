@@ -2,9 +2,8 @@
 
 namespace App\Filament\Common\Resources\DepositResource\Pages;
 
-use Filament\Actions\Action;
 use App\Filament\Common\Resources\DepositResource;
-use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
 

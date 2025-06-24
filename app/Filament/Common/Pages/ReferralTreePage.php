@@ -10,13 +10,13 @@ class ReferralTreePage extends Page
 {
     protected string $view = 'filament.pages.referral-tree-page';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?string $navigationLabel = 'Referral Tree';
 
     protected static ?string $title = 'Referral Tree Visualization';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Visualization';
+    protected static string|\UnitEnum|null $navigationGroup = 'Visualization';
 
     protected ?string $heading = '';
 

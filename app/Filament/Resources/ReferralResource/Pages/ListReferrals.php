@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\ReferralResource\Pages;
 
-use Filament\Actions\Action;
 use App\Filament\Resources\ReferralResource;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;

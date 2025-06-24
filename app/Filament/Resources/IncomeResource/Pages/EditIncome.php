@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\IncomeResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\IncomeResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditIncome extends EditRecord

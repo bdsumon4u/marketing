@@ -3,9 +3,7 @@
 namespace App\Filament\Admin\Resources\UserResource\Pages;
 
 use App\Filament\Admin\Resources\UserResource;
-use App\Models\User;
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -13,7 +11,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -23,8 +20,8 @@ use Illuminate\Support\Number;
 
 class ProductPage extends Page implements HasForms, HasTable
 {
-    use InteractsWithRecord;
     use InteractsWithForms;
+    use InteractsWithRecord;
     use InteractsWithTable;
 
     protected static bool $shouldRegisterNavigation = false;

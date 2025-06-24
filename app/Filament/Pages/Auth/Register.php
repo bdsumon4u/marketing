@@ -2,13 +2,11 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Grid;
 use App\Models\User;
-use Filament\Forms;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
-use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class Register extends \Filament\Auth\Pages\Register
 {

@@ -13,11 +13,9 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Tables\Table;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -90,8 +88,8 @@ class AppPanelProvider extends PanelProvider
                         <x-filament::badge
                             color="primary"
                             title="'.value(fn (): User => Filament::auth()->user())->rank_updated_at->format(
-                                config('app.datetime_format'),
-                            ).'"
+                    config('app.datetime_format'),
+                ).'"
                         >
                             '.value(fn (): User => Filament::auth()->user())->rank->name.'
                         </x-filament::badge>

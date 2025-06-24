@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use Filament\Schemas\Schema;
 use App\Jobs\ActivateUserAccount;
 use App\Jobs\ProcessCompanyFund;
 use App\Jobs\ProcessMagicIncome;
@@ -14,6 +13,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
 use Livewire\Component;

@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\ReferralResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\ReferralResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditReferral extends EditRecord

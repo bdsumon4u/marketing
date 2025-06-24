@@ -67,19 +67,13 @@ class DepositResource extends Resource
                     ->tooltip(fn (Transaction $record): string => $record->payable->name)
                     ->label('User')
                     ->searchable()
-                    ->sortable()
                     ->visible(fn () => Filament::getCurrentOrDefaultPanel()->getId() === 'admin'),
-                TextColumn::make('wallet.name')
-                    ->label('Wallet')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('amountFloat')
                     ->label('Amount')
                     ->money()
                     ->tooltip(fn (Transaction $record): string => $record->meta['transaction_id'] ?? ''),
                 IconColumn::make('confirmed')
                     ->boolean()
-                    ->alignCenter()
                     ->sortable(),
             ])
             ->filters([

@@ -22,7 +22,6 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
-use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class WithdrawResource extends Resource
 {
@@ -84,7 +83,6 @@ class WithdrawResource extends Resource
                     ->tooltip(fn (Transaction $record): string => $record->payable->name)
                     ->label('User')
                     ->searchable()
-                    ->sortable()
                     ->visible(fn () => Filament::getCurrentOrDefaultPanel()->getId() === 'admin'),
                 TextColumn::make('amountFloat')
                     ->label('Amount')
@@ -94,11 +92,9 @@ class WithdrawResource extends Resource
                     ->tooltip(fn (Transaction $record): string => $record->meta['transaction_id'] ?? ''),
                 TextColumn::make('meta.message')
                     ->label('Message')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
                 IconColumn::make('confirmed')
                     ->boolean()
-                    ->alignCenter()
                     ->sortable(),
             ])
             ->filters([

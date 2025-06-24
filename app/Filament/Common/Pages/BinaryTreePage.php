@@ -10,13 +10,13 @@ class BinaryTreePage extends Page
 {
     protected string $view = 'filament.pages.binary-tree-page';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-share';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-share';
 
     protected static ?string $navigationLabel = 'Binary Tree';
 
     protected static ?string $title = 'Binary Tree Visualization';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Visualization';
+    protected static string|\UnitEnum|null $navigationGroup = 'Visualization';
 
     protected ?string $heading = '';
 

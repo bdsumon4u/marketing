@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use Exception;
 use App\Enums\CompanyWalletType;
 use App\Models\User;
 use App\Models\Wallet;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Arr;
