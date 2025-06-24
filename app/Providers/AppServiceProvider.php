@@ -11,6 +11,7 @@ use Filament\Forms\Components\TextInput\Actions\HidePasswordAction;
 use Filament\Forms\Components\TextInput\Actions\ShowPasswordAction;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\SelectFilter;
@@ -69,5 +70,9 @@ class AppServiceProvider extends ServiceProvider
         foreach ([Select::class, MorphToSelect::class, DateTimePicker::class, SelectFilter::class, IsRelatedToOperator::class, SelectConstraint::class] as $class) {
             $class::configureUsing(fn ($component) => $component->native($isMobile));
         }
+
+        IconColumn::configureUsing(function (IconColumn $column) {
+            return $column->alignCenter();
+        });
     }
 }
