@@ -22,7 +22,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Number;
+use App\View\ThemedViewFinder;
+use Illuminate\Support\Facades\View;
+use Illuminate\View\Factory as ViewFactory;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Filesystem\Filesystem;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,7 +35,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton('view.finder', function ($app) {
+            $paths = $app['config']['view.paths'];
+            $filesystem = new Filesystem;
+
+            $finder = new ThemedViewFinder($filesystem, $paths);
+            $theme = config('view.theme', 'defaultx'); // Set default theme or pull from DB/session
+            $finder->setTheme($theme);
+
+            return $finder;
+        });
     }
 
     /**
@@ -57,9 +70,9 @@ class AppServiceProvider extends ServiceProvider
         ShowPasswordAction::configureUsing(function (ShowPasswordAction $action) {
             return $action->extraAttributes(['tabindex' => '-1']);
         });
-        HidePasswordAction::configureUsing(function (HidePasswordAction $action) {
-            return $action->extraAttributes(['tabindex' => '-1']);
-        });
+        // HidePasswordAction::configureUsing(function (HidePasswordAction $action) {
+        //     return $action->extraAttributes(['tabindex' => '-1']);
+        // });
 
         FilamentAsset::register([
             Js::make('global', __DIR__.'/../../resources/js/global.js'),

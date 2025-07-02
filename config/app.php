@@ -129,6 +129,4 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'registration_fee' => env('REGISTRATION_FEE', 100),
-
 ];
